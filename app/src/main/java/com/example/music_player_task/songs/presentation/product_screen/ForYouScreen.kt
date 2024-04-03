@@ -1,4 +1,4 @@
-package com.example.androidjetpackcomposepracticeprojects.store.presentation.product_screen
+package com.example.music_player_task.songs.presentation.product_screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,29 +31,30 @@ import com.example.androidjetpackcomposepracticeprojects.store.presentation.view
 import com.example.androidjetpackcomposepracticeprojects.store.presentation.viewModels.ProductsViewModel
 import com.example.androidjetpackcomposepracticeprojects.store.presentation.viewModels.StoreProductDetailsViewModel
 import com.example.androidjetpackcomposepracticeprojects.ui.theme.ubuntu
+import com.example.music_player_task.songs.presentation.util.components.MyTopAppBar
+import com.example.music_player_task.songs.presentation.viewModels.MusicPlayerStates
+import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
 
 @Composable
 internal fun StoreProductScreen(
-    viewModel: ProductsViewModel = hiltViewModel(),
+    viewModel: SongViewModel = hiltViewModel(),
     navController: NavHostController,
-    productViewModel: StoreProductDetailsViewModel,
     ) {
+
     val state by viewModel.state.collectAsStateWithLifecycle()
-    ProductContent(state = state, navController = navController){
-        productViewModel.changeNavigationState("")
-    }
+    ForYouScreenContent(state = state, navController = navController)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductContent(
-    state: ProductScreenState, navController: NavHostController,onClick: (String) -> Unit
+fun ForYouScreenContent(
+    state: MusicPlayerStates, navController: NavHostController,
 ) {
     LoadingDialog(isLoading = state.isLoading)
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            StoreTopAppBar(
+            MyTopAppBar(
                 title = {
                     Text(
                         "Products",

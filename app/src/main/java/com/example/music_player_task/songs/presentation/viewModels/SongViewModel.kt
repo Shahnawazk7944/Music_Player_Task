@@ -1,8 +1,9 @@
-package com.example.androidjetpackcomposepracticeprojects.store.presentation.viewModels
+package com.example.music_player_task.songs.presentation.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.androidjetpackcomposepracticeprojects.store.domain.repository.ProductsRepository
+import com.example.music_player_task.songs.domain.repository.SongImageRepository
+import com.example.music_player_task.songs.domain.repository.SongRepository
 import com.example.music_player_task.songs.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,39 +13,40 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ProductsViewModel @Inject constructor(
-    private val productsRepository: ProductsRepository
+class SongViewModel @Inject constructor(
+    private val songRepository: SongRepository,
+    private val songImageRepository: SongImageRepository
 ) : ViewModel() {
-    private val _state =
-        MutableStateFlow(ProductScreenState())
-    val state = _state.asStateFlow()
+    private val _musicPlayerState =
+        MutableStateFlow(MusicPlayerStates())
+    val state = _musicPlayerState.asStateFlow()
 
     init {
-        getProducts()
+        getSongs()
     }
 
-    private fun getProducts() {
+    private fun getSongs() {
         viewModelScope.launch {
-            _state.update {
+            _musicPlayerState.update {
                 it.copy(isLoading = true)
             }
-            productsRepository.getProduct()
-                .onRight { products ->
-                    _state.update {
+            songRepository.getSongs()
+                .onRight { songs ->
+                    _musicPlayerState.update {
                         it.copy(
-                            product = products
+                            songs = songs
                         )
                     }
                 }
                 .onLeft { error ->
-                    _state.update {
+                    _musicPlayerState.update {
                         it.copy(
                             error = error.error.message
                         )
                     }
                     sendEvent(event = Event.Toast(error.error.message))
                 }
-            _state.update {
+            _musicPlayerState.update {
                 it.copy(isLoading = false)
             }
         }

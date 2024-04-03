@@ -10,7 +10,7 @@ fun MusicPlayerNavGraph(
     viewModel: StoreProductDetailsViewModel,
     navController: NavHostController,
 ) {
-    NavHost(navController = navController, startDestination = "home") {
+    NavHost(navController = navController, startDestination = Screen.ForYou.route) {
 
 //        composable(route = StoreScreen.StoreHomeScreen.route) {
 //           // StoreProductScreen(navController = navController, productViewModel = viewModel)
