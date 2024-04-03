@@ -1,4 +1,4 @@
-package com.example.androidjetpackcomposepracticeprojects.store.presentation.viewModels
+package com.example.music_player_task.songs.presentation.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
