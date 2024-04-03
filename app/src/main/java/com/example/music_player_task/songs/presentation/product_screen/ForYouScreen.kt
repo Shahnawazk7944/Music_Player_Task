@@ -1,13 +1,11 @@
 package com.example.music_player_task.songs.presentation.product_screen
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -22,25 +20,20 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.example.androidjetpackcomposepracticeprojects.R
-import com.example.androidjetpackcomposepracticeprojects.store.presentation.StoreScreen
-import com.example.androidjetpackcomposepracticeprojects.store.presentation.product_screen.components.ProductCard
+import com.example.music_player_task.R
+import com.example.music_player_task.navigation.Screen
+import com.example.music_player_task.songs.domain.model.Song
 import com.example.music_player_task.songs.presentation.util.components.LoadingDialog
-import com.example.music_player_task.songs.presentation.util.components.StoreTopAppBar
-import com.example.androidjetpackcomposepracticeprojects.store.presentation.viewModels.ProductScreenState
-import com.example.androidjetpackcomposepracticeprojects.store.presentation.viewModels.ProductsViewModel
-import com.example.androidjetpackcomposepracticeprojects.store.presentation.viewModels.StoreProductDetailsViewModel
-import com.example.androidjetpackcomposepracticeprojects.ui.theme.ubuntu
 import com.example.music_player_task.songs.presentation.util.components.MyTopAppBar
 import com.example.music_player_task.songs.presentation.viewModels.MusicPlayerStates
 import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
 import com.example.music_player_task.ui.ubuntu
 
 @Composable
-internal fun StoreProductScreen(
-    viewModel: SongViewModel = hiltViewModel(),
+internal fun ForYouScreen(
+    viewModel: SongViewModel,
     navController: NavHostController,
-    ) {
+) {
 
     val state by viewModel.state.collectAsStateWithLifecycle()
     ForYouScreenContent(state = state, navController = navController)
@@ -75,24 +68,32 @@ fun ForYouScreenContent(
             )
         }
     ) { padding ->
-        LazyVerticalStaggeredGrid(
+        LazyColumn(
             modifier = Modifier.padding(padding),
-            columns = StaggeredGridCells.Fixed(2),
             contentPadding = PaddingValues(5.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalItemSpacing = 5.dp
         ) {
 
-            items(state.product.size) { index ->
-                val product = state.product[index]
+            items(state.songs!!.data.size) { index ->
+                val songImageKey = state.songs.data[index].cover
                 Box(Modifier.clickable {
-                    onClick("")
-                    navController.navigate(StoreScreen.StoreProductDetails.passToProductDetailsScree(index+1)) // Navigate with index
+                    navController.navigate(
+                        Screen.SongScreen.passToSongScreen(songImageKey)
+//                        StoreScreen.StoreProductDetails.passToProductDetailsScree(
+//                            index + 1
+//                        )
+                    ) // Navigate with index
                 }) {
-                    ProductCard(product = product)
+                    SongCard(song = state.songs.data[index])
                 }
 
             }
         }
     }
+}
+
+@Composable
+fun SongCard(
+    song: Song
+) {
+
 }
