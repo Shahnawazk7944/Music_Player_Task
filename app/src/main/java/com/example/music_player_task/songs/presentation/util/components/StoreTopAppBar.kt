@@ -1,4 +1,4 @@
-package com.example.androidjetpackcomposepracticeprojects.store.presentation.util.components
+package com.example.music_player_task.songs.presentation.util.components
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
@@ -12,17 +12,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.androidjetpackcomposepracticeprojects.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StoreTopAppBar(
+fun MyTopAppBar(
     onClick: () -> Unit,
     title: @Composable () -> Unit,
     action: @Composable RowScope.() -> Unit,
-    appBarLeadingIcon:Painter
+    appBarLeadingIcon: Painter
 ) {
     TopAppBar(
         title = title,

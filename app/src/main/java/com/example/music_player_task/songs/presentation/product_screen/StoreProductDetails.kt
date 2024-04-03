@@ -59,8 +59,8 @@ import com.example.music_player_task.songs.domain.model.Product
 import com.example.music_player_task.songs.domain.model.Rating
 import com.example.androidjetpackcomposepracticeprojects.store.presentation.StoreScreen
 import com.example.androidjetpackcomposepracticeprojects.store.presentation.product_screen.components.RatingBar
-import com.example.androidjetpackcomposepracticeprojects.store.presentation.util.components.LoadingDialog
-import com.example.androidjetpackcomposepracticeprojects.store.presentation.util.components.StoreTopAppBar
+import com.example.music_player_task.songs.presentation.util.components.LoadingDialog
+import com.example.music_player_task.songs.presentation.util.components.StoreTopAppBar
 import com.example.androidjetpackcomposepracticeprojects.store.presentation.viewModels.ProductDetailsScreenState
 import com.example.androidjetpackcomposepracticeprojects.store.presentation.viewModels.StoreProductDetailsViewModel
 import com.example.androidjetpackcomposepracticeprojects.ui.theme.AzureMist

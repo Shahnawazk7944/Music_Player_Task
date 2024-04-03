@@ -1,4 +1,4 @@
-package com.example.androidjetpackcomposepracticeprojects.store.presentation.util.components
+package com.example.music_player_task.songs.presentation.util.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

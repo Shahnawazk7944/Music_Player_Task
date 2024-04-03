@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -26,8 +25,8 @@ import androidx.navigation.NavHostController
 import com.example.androidjetpackcomposepracticeprojects.R
 import com.example.androidjetpackcomposepracticeprojects.store.presentation.StoreScreen
 import com.example.androidjetpackcomposepracticeprojects.store.presentation.product_screen.components.ProductCard
-import com.example.androidjetpackcomposepracticeprojects.store.presentation.util.components.LoadingDialog
-import com.example.androidjetpackcomposepracticeprojects.store.presentation.util.components.StoreTopAppBar
+import com.example.music_player_task.songs.presentation.util.components.LoadingDialog
+import com.example.music_player_task.songs.presentation.util.components.StoreTopAppBar
 import com.example.androidjetpackcomposepracticeprojects.store.presentation.viewModels.ProductScreenState
 import com.example.androidjetpackcomposepracticeprojects.store.presentation.viewModels.ProductsViewModel
 import com.example.androidjetpackcomposepracticeprojects.store.presentation.viewModels.StoreProductDetailsViewModel

@@ -49,8 +49,7 @@ import coil.request.ImageRequest
 import coil.size.Size
 import com.example.androidjetpackcomposepracticeprojects.R
 import com.example.androidjetpackcomposepracticeprojects.quote.presentation.presentation.product_screen.components.ProfileDetailsRowComp
-import com.example.androidjetpackcomposepracticeprojects.quote.presentation.presentation.util.components.QuotesTopAppBar
-import com.example.androidjetpackcomposepracticeprojects.store.presentation.util.components.StoreTopAppBar
+import com.example.music_player_task.songs.presentation.util.components.StoreTopAppBar
 import com.example.androidjetpackcomposepracticeprojects.ui.theme.rubik
 import com.example.androidjetpackcomposepracticeprojects.ui.theme.ubuntu
 
