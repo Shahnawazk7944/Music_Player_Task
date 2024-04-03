@@ -34,6 +34,7 @@ import com.example.androidjetpackcomposepracticeprojects.ui.theme.ubuntu
 import com.example.music_player_task.songs.presentation.util.components.MyTopAppBar
 import com.example.music_player_task.songs.presentation.viewModels.MusicPlayerStates
 import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
+import com.example.music_player_task.ui.ubuntu
 
 @Composable
 internal fun StoreProductScreen(
@@ -57,7 +58,7 @@ fun ForYouScreenContent(
             MyTopAppBar(
                 title = {
                     Text(
-                        "Products",
+                        "For You",
                         fontFamily = ubuntu,
                         fontSize = 25.sp,
                         fontWeight = FontWeight.Bold,
