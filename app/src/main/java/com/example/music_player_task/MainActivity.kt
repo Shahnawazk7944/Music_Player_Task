@@ -35,6 +35,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     Music_Player_TaskTheme {
-        Greeting("Android")
+
     }
 }
