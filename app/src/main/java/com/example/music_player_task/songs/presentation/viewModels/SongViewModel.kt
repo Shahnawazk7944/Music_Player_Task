@@ -52,4 +52,19 @@ class SongViewModel @Inject constructor(
         }
     }
 
+
+    fun onEvent(event:MusicPlayerUiEvents){
+        when(event){
+
+            is MusicPlayerUiEvents.NavigateTo -> {
+                _musicPlayerState.update {
+                    it.copy(route = event.route)
+                }
+            }
+
+
+
+        }
+    }
+
 }
