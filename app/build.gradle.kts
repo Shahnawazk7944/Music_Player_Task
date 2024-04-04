@@ -77,27 +77,27 @@ dependencies {
 //    kapt("androidx.room:room-compiler:$roomVersion")
 
     //navigation
-    implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
     // Arrow
-    implementation("io.arrow-kt:arrow-core:1.2.0")
-    implementation("io.arrow-kt:arrow-fx-coroutines:1.2.0")
+    implementation(libs.arrow.core)
+    implementation(libs.arrow.fx.coroutines)
     // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
     //Coil
-    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation(libs.coil.compose)
     //dagger hilt
-    implementation("com.google.dagger:hilt-android:2.46")
-    kapt("com.google.dagger:hilt-android-compiler:2.46")
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
 //    implementation("androidx.hilt:hilt-work:1.1.0")
 //    kapt("androidx.hilt:hilt-compiler:1.1.0")
 //    implementation("androidx.work:work-runtime-ktx:2.9.0")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.androidx.hilt.navigation.compose)
 
     //Material extended icon
-    implementation("androidx.compose.material:material-icons-extended-android:1.6.5")
+    implementation(libs.androidx.material.icons.extended.android)
 
 
 

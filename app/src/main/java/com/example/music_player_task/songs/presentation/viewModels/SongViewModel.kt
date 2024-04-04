@@ -53,18 +53,45 @@ class SongViewModel @Inject constructor(
     }
 
 
-    fun onEvent(event:MusicPlayerUiEvents){
-        when(event){
+    fun onEvent(event: MusicPlayerUiEvents) {
 
+        when (event) {
             is MusicPlayerUiEvents.NavigateTo -> {
                 _musicPlayerState.update {
                     it.copy(route = event.route)
                 }
             }
 
+            is MusicPlayerUiEvents.GetSongImage -> {
+                viewModelScope.launch {
+                    songImageRepository.getSongImage(event.imageId)
+                        .onRight { image ->
+                            _musicPlayerState.update {
+                                it.copy(
+                                    songImage = image
+                                )
+                            }
+                        }
+                        .onLeft { error ->
+                            _musicPlayerState.update {
+                                it.copy(
+                                    error = error.error.message
+                                )
+                            }
+                            sendEvent(event = Event.Toast(error.error.message))
+                        }
+                }
+            }
+
+
 
 
         }
+
+
+
+
+
     }
 
 }
