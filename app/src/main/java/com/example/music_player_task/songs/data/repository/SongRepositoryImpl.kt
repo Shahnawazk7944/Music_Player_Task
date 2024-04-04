@@ -2,6 +2,7 @@ package com.example.music_player_task.songs.data.repository
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import arrow.core.Either
 import com.example.music_player_task.songs.data.mapper.toNetworkError
 import com.example.music_player_task.songs.data.remote.SongApi
@@ -31,11 +32,14 @@ class SongImageRepositoryImpl @Inject constructor(
     private val songImageApi: SongImageApi
 ) : SongImageRepository {
     override suspend fun getSongImage(imageId: String): Either<NetworkError, Bitmap?> {
+        Log.d("check called getImage","with image id is $imageId")
         //delay(2000)
         return try {
             val image = withContext(Dispatchers.IO) {
                 async { songImageApi.getSongImage(imageId = imageId) }.await()
             }
+            Log.d("check called api","${image.body()?.bytes()}")
+
             val imageBytes = image.body()?.bytes()
             val bitmap = imageBytes?.let { BitmapFactory.decodeByteArray(imageBytes, 0, it.size) }
             return Either.Right(bitmap)
