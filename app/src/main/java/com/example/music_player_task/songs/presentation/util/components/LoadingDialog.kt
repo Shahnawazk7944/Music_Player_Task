@@ -27,11 +27,11 @@ fun LoadingDialog(isLoading: Boolean) {
                 modifier = Modifier
                     .width(200.dp)
                     .clip(RoundedCornerShape(15.dp))
-                    .background(Color.White),
+                    .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ){
                 CircularProgressIndicator(
-                    modifier = Modifier.size(70.dp).padding(10.dp),color = MaterialTheme.colorScheme.primary
+                    modifier = Modifier.size(70.dp).padding(10.dp),color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }

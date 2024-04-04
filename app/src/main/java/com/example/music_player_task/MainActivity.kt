@@ -8,23 +8,17 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -36,13 +30,16 @@ import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
 import com.example.music_player_task.songs.util.Event
 import com.example.music_player_task.songs.util.EventBus
 import com.example.music_player_task.ui.theme.Music_Player_TaskTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    //private val songViewModel by viewModels<SongViewModel>()
+    private val songViewModel by viewModels<SongViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
+
             val lifecyclleOwner = LocalLifecycleOwner.current.lifecycle
             LaunchedEffect(key1 = lifecyclleOwner) {
                 lifecyclleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -63,7 +60,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val songViewModel : SongViewModel = hiltViewModel()
+                    // val songViewModel : SongViewModel = hiltViewModel()
+                    //val songViewModel by viewModels<SongViewModel>()
                     val navController = rememberNavController()
                     val state by songViewModel.state.collectAsStateWithLifecycle()
 
@@ -124,7 +122,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 
 
 @Preview(showBackground = true)
