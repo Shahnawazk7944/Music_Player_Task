@@ -1,7 +1,6 @@
 package com.example.music_player_task.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -14,7 +13,7 @@ import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
 
 @Composable
 fun MusicPlayerNavGraph(
-    viewModel: SongViewModel = hiltViewModel(),
+    viewModel: SongViewModel,
     navController: NavHostController,
 ) {
     NavHost(navController = navController, startDestination = Screen.ForYou.route) {
