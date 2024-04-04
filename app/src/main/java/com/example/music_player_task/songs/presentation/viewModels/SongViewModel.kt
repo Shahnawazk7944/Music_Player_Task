@@ -64,6 +64,11 @@ class SongViewModel @Inject constructor(
 
             is MusicPlayerUiEvents.GetSongImage -> {
                 viewModelScope.launch {
+                    _musicPlayerState.update {
+                        it.copy(
+                            isSongImageLoading = true
+                        )
+                    }
                     songImageRepository.getSongImage(event.imageId)
                         .onRight { image ->
                             _musicPlayerState.update {
@@ -80,16 +85,16 @@ class SongViewModel @Inject constructor(
                             }
                             sendEvent(event = Event.Toast(error.error.message))
                         }
+                    _musicPlayerState.update {
+                        it.copy(
+                            isSongImageLoading = false
+                        )
+                    }
                 }
             }
 
 
-
-
         }
-
-
-
 
 
     }

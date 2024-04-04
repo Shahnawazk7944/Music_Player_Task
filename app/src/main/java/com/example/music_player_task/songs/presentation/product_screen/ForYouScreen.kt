@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,6 +36,7 @@ import com.example.music_player_task.songs.domain.model.Song
 import com.example.music_player_task.songs.presentation.util.components.LoadingDialog
 import com.example.music_player_task.songs.presentation.util.components.MyTopAppBar
 import com.example.music_player_task.songs.presentation.viewModels.MusicPlayerStates
+import com.example.music_player_task.songs.presentation.viewModels.MusicPlayerUiEvents
 import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
 import com.example.music_player_task.ui.ubuntu
 
@@ -86,7 +89,7 @@ fun ForYouScreenContent(
 
                 items(state.songs!!.data.size) { index ->
                     val songImageKey = state.songs.data[index].cover
-                    //viewModel.onEvent(MusicPlayerUiEvents.GetSongImage(songImageKey))
+                    viewModel.onEvent(MusicPlayerUiEvents.GetSongImage(songImageKey))
                     Box(Modifier.clickable {
                         navController.navigate(
                             Screen.SongScreen.passToSongScreen(songImageKey)
@@ -95,10 +98,17 @@ fun ForYouScreenContent(
 //                        )
                         ) // Navigate with index
                     }) {
-                        SongCard(
-                            song = state.songs.data[index],
-                            //state.songImage
-                        )
+                        if (state.isSongImageLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(50.dp).padding(10.dp),color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        } else {
+                            SongCard(
+                                song = state.songs.data[index],
+                                //state.songImage
+                            )
+                        }
+
                     }
 
                 }
