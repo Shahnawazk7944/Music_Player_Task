@@ -11,5 +11,6 @@ data class MusicPlayerStates(
     val error: String? = null,
     var route:String = "forYou",
     var songImage: Bitmap? = null,
+    var songImages: MutableList<Bitmap> = mutableListOf(),
 )
 

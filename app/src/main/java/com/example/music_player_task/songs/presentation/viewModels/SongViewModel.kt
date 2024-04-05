@@ -1,15 +1,18 @@
 package com.example.music_player_task.songs.presentation.viewModels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.music_player_task.songs.domain.repository.SongImageRepository
 import com.example.music_player_task.songs.domain.repository.SongRepository
 import com.example.music_player_task.songs.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.internal.wait
 import javax.inject.Inject
 
 @HiltViewModel
@@ -46,6 +49,7 @@ class SongViewModel @Inject constructor(
                     }
                     sendEvent(event = Event.Toast(error.error.message))
                 }
+            Log.d("check songs", state.value.songs!!.data[1].name)
             _musicPlayerState.update {
                 it.copy(isLoading = false)
             }
@@ -73,7 +77,11 @@ class SongViewModel @Inject constructor(
                         .onRight { image ->
                             _musicPlayerState.update {
                                 it.copy(
-                                    songImage = image
+                                    songImage = image,
+                                    songImages = it.songImages.toMutableList().apply {
+                                        add(image!!)
+                                        Log.d("check array size" ,"${state.value.songImages.size}")
+                                    }
                                 )
                             }
                         }
