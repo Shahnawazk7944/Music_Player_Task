@@ -2,6 +2,7 @@ package com.example.music_player_task.songs.presentation.music_player_screens
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -94,20 +95,34 @@ fun ForYouScreenContent(
             ) {
                 items(state.songs!!.data.size) { index ->
                     val songImageKey = state.songs.data[index].cover
+
                     viewModel.onEvent(MusicPlayerUiEvents.GetSongImage(songImageKey))
+                    Log.d("check", "${state.isSongImageLoading}")
+
 
                     Box(Modifier.clickable {
-                        navController.navigate(
-                            Screen.SongScreen.passToSongScreen(songImageKey)
-                        )
+                        navController.navigate(Screen.SongScreen.passToSongScreen(songImageKey))
                     }) {
 
-                        SongCard(
-                            song = state.songs.data[index],
-                            songImages = state.songImages,
-                            index = index,
-                            isImageLoading = state.isSongImageLoading
-                        )
+                        if (state.isSongImageLoading) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(50.dp)
+                                        .padding(10.dp),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        } else {
+                            SongCard(
+                                song = state.songs.data[index],
+                                songImages = state.songImages,
+                                index = index,
+                            )
+                        }
 
 
                     }

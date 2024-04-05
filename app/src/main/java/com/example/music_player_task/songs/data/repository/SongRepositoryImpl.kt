@@ -15,8 +15,8 @@ import com.example.music_player_task.songs.domain.repository.SongImageRepository
 import com.example.music_player_task.songs.domain.repository.SongRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import okhttp3.internal.wait
 import javax.inject.Inject
 
 class SongRepositoryImpl @Inject constructor(
@@ -58,14 +58,16 @@ class SongImageRepositoryImpl @Inject constructor(
     private val songImageApi: SongImageApi
 ) : SongImageRepository {
     override suspend fun getSongImage(imageId: String): Either<ImageNetworkError, Bitmap?> {
-        Log.d("check called getImage","with image id is $imageId")
+        Log.d("check called getImage", "with image id is $imageId")
 
         return try {
-            val imageResponse = withContext(Dispatchers.IO) {
-               async { songImageApi.getSongImage(imageId = imageId)}.await()
+            val imageResponse = withContext(Dispatchers.IO){
+                 async{ songImageApi.getSongImage(imageId = imageId) }.await()
+
 
             }
-            Log.d("check called api","${imageResponse.code()}")
+//            delay(3000)
+            Log.d("check called api", "${imageResponse.code()}")
 
             if (imageResponse.isSuccessful) {
                 val imageBytes = imageResponse.body()?.bytes()
@@ -74,7 +76,7 @@ class SongImageRepositoryImpl @Inject constructor(
                     Log.d("check loaded?", bitmap.toString())
                     Either.Right(bitmap)
                 } ?: Either.Left("Image fetched but something went wrong".toImageNetworkError())
-            } else{
+            } else {
                 return Either.Left(imageResponse.code().toString().toImageNetworkError())
             }
         } catch (e: Exception) {
