@@ -7,7 +7,6 @@ import com.example.music_player_task.songs.domain.repository.SongImageRepository
 import com.example.music_player_task.songs.domain.repository.SongRepository
 import com.example.music_player_task.songs.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -17,11 +16,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SongViewModel @Inject constructor(
-    private val songRepository: SongRepository,
-    private val songImageRepository: SongImageRepository
+    private val songRepository: SongRepository, private val songImageRepository: SongImageRepository
 ) : ViewModel() {
-    private val _musicPlayerState =
-        MutableStateFlow(MusicPlayerStates())
+    private val _musicPlayerState = MutableStateFlow(MusicPlayerStates())
     val state = _musicPlayerState.asStateFlow()
 
     init {
@@ -33,22 +30,20 @@ class SongViewModel @Inject constructor(
             _musicPlayerState.update {
                 it.copy(isLoading = true)
             }
-            songRepository.getSongs()
-                .onRight { songs ->
-                    _musicPlayerState.update {
-                        it.copy(
-                            songs = songs
-                        )
-                    }
+            songRepository.getSongs().onRight { songs ->
+                _musicPlayerState.update {
+                    it.copy(
+                        songs = songs
+                    )
                 }
-                .onLeft { error ->
-                    _musicPlayerState.update {
-                        it.copy(
-                            error = error.error.message
-                        )
-                    }
-                    sendEvent(event = Event.Toast(error.error.message))
+            }.onLeft { error ->
+                _musicPlayerState.update {
+                    it.copy(
+                        error = error.error.message
+                    )
                 }
+                sendEvent(event = Event.Toast(error.error.message))
+            }
             Log.d("check songs", state.value.songs!!.data[1].name)
             _musicPlayerState.update {
                 it.copy(isLoading = false)
@@ -58,7 +53,6 @@ class SongViewModel @Inject constructor(
 
 
     fun onEvent(event: MusicPlayerUiEvents) {
-
         when (event) {
             is MusicPlayerUiEvents.NavigateTo -> {
                 _musicPlayerState.update {
@@ -67,38 +61,38 @@ class SongViewModel @Inject constructor(
             }
 
             is MusicPlayerUiEvents.GetSongImage -> {
+                _musicPlayerState.update { it.copy(isSongImageLoading = true) }
+
                 viewModelScope.launch {
-                    _musicPlayerState.update {
-                        it.copy(
-                            isSongImageLoading = true
-                        )
-                    }
-                    songImageRepository.getSongImage(event.imageId)
-                        .onRight { image ->
-                            _musicPlayerState.update {
-                                it.copy(
-                                    songImage = image,
-                                    songImages = it.songImages.toMutableList().apply {
-                                        add(image!!)
-                                        Log.d("check array size" ,"${state.value.songImages.size}")
-                                    }
-                                )
-                            }
+                    Log.d("check", "${state.value.isSongImageLoading}")
+                    songImageRepository.getSongImage(event.imageId).onRight { image ->
+                        _musicPlayerState.update {
+                            it.copy(
+                                songImages = it.songImages.toMutableList().apply {
+                                    add(image!!)
+                                    Log.d("check array size", "${state.value.songImages.size}")
+                                },
+
+                            )
                         }
-                        .onLeft { error ->
-                            _musicPlayerState.update {
-                                it.copy(
-                                    error = error.error.message
-                                )
-                            }
-                            sendEvent(event = Event.Toast(error.error.message))
+                    }.onLeft { error ->
+                        _musicPlayerState.update {
+                            it.copy(
+                                error = error.error.message,
+                                isSongImageLoading = false
+                            )
                         }
-                    _musicPlayerState.update {
-                        it.copy(
-                            isSongImageLoading = false
-                        )
+                        sendEvent(event = Event.Toast(error.error.message))
                     }
                 }
+                Log.d("check after", "${state.value.isSongImageLoading}")
+                _musicPlayerState.update {
+                    it.copy(
+                        isSongImageLoading = false
+                    )
+                }
+
+
             }
 
 
