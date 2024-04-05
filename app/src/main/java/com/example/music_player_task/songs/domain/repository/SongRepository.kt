@@ -2,6 +2,7 @@ package com.example.music_player_task.songs.domain.repository
 
 import android.graphics.Bitmap
 import arrow.core.Either
+import com.example.music_player_task.songs.domain.model.ImageNetworkError
 import com.example.music_player_task.songs.domain.model.NetworkError
 import com.example.music_player_task.songs.domain.model.Songs
 
@@ -11,5 +12,5 @@ interface SongRepository {
 }
 
 interface SongImageRepository {
-    suspend fun getSongImage(imageId: String): Either<NetworkError, Bitmap?>
+    suspend fun getSongImage(imageId: String): Either<ImageNetworkError, Bitmap?>
 }

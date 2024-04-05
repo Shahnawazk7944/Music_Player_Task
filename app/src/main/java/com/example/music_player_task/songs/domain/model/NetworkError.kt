@@ -7,5 +7,15 @@ data class NetworkError(
 enum class ApiError(val message:String){
     NetworkError("Network Error"),
     UnknownResponse("Unknown Response"),
-    UnknownError("Unknown Error")
+    UnknownError("Unknown Error"),
+}
+
+data class ImageNetworkError(
+    val error: ImageApiError,
+    val t: String? = null
+)
+enum class ImageApiError(val message:String){
+    Success("Success 200"),
+    Failed("Failed NA"),
+    UnknownError("Unknown Error"),
 }

@@ -6,9 +6,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.music_player_task.songs.presentation.product_screen.ForYouScreen
-import com.example.music_player_task.songs.presentation.product_screen.SongScreen
-import com.example.music_player_task.songs.presentation.product_screen.TopTrack
+import com.example.music_player_task.songs.presentation.music_player_screens.ForYouScreen
+import com.example.music_player_task.songs.presentation.music_player_screens.SongScreen
+import com.example.music_player_task.songs.presentation.music_player_screens.TopTrack
 import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
 
 @Composable
