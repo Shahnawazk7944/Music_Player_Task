@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -93,16 +94,11 @@ fun ForYouScreenContent(
                 modifier = Modifier.padding(padding),
                 contentPadding = PaddingValues(5.dp),
             ) {
+
                 items(state.songs!!.data.size) { index ->
                     val songImageKey = state.songs.data[index].cover
-
                     viewModel.onEvent(MusicPlayerUiEvents.GetSongImage(songImageKey))
                     Log.d("check", "${state.isSongImageLoading}")
-
-
-                    Box(Modifier.clickable {
-                        navController.navigate(Screen.SongScreen.passToSongScreen(songImageKey))
-                    }) {
 
                         if (state.isSongImageLoading) {
                             Box(
@@ -117,15 +113,17 @@ fun ForYouScreenContent(
                                 )
                             }
                         } else {
-                            SongCard(
-                                song = state.songs.data[index],
-                                songImages = state.songImages,
-                                index = index,
-                            )
+                            Box(Modifier.clickable {
+                                navController.navigate(Screen.SongScreen.passToSongScreen(songImageKey))
+                            }) {
+                                SongCard(
+                                    song = state.songs.data[index],
+                                    songImages = state.songImages,
+                                    index = index,
+                                    songImage = state.songImage
+                                )
+                            }
                         }
-
-
-                    }
 
                 }
             }
@@ -137,8 +135,9 @@ fun ForYouScreenContent(
 fun SongCard(
     song: Song,
     index: Int,
-    songImages: List<Bitmap>,
-    isImageLoading: Boolean = false
+    songImages: List<Bitmap?>,
+    isImageLoading: Boolean = false,
+    songImage: Bitmap?
 //    state: MusicPlayerStates,
 //    index: Int
 ) {
@@ -164,14 +163,16 @@ fun SongCard(
                     color = MaterialTheme.colorScheme.primary
                 )
             } else {
-                Image(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    contentDescription = "null",
-                    contentScale = ContentScale.Crop,
-                    bitmap = songImages[index].asImageBitmap()
-                )
+                songImages[index]?.let {
+                    Image(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(12.dp)),
+                        contentDescription = "null",
+                        contentScale = ContentScale.Crop,
+                        bitmap = it.asImageBitmap()
+                    )
+                }
             }
 
             Column(
