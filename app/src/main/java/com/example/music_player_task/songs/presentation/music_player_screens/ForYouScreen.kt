@@ -132,7 +132,22 @@ fun SongCard(
                 .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
+            SubcomposeAsyncImage(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                model = BASE_URL+"assets/"+song.cover,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                loading = {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .padding(10.dp),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                },
+            )
 
             Column(
                 modifier = Modifier.padding(horizontal = 5.dp),
