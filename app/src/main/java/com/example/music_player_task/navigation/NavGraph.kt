@@ -39,7 +39,7 @@ fun MusicPlayerNavGraph(
         }
 
         composable(route = Screen.TopTrack.route) {
-            TopTrack(navController = navController)
+            TopTrack(navController = navController, viewModel = viewModel)
         }
 
     }
