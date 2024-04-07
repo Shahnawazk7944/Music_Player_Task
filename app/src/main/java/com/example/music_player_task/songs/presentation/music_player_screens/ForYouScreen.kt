@@ -2,20 +2,23 @@ package com.example.music_player_task.songs.presentation.music_player_screens
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -27,21 +30,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
-import com.example.music_player_task.R
 import com.example.music_player_task.songs.domain.model.Song
 import com.example.music_player_task.songs.presentation.util.components.LoadingDialog
-import com.example.music_player_task.songs.presentation.util.components.MyTopAppBar
 import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
 import com.example.music_player_task.songs.util.Constant.BASE_URL
+import com.example.music_player_task.ui.poppins
 import com.example.music_player_task.ui.ubuntu
 
 @Composable
@@ -53,34 +52,25 @@ internal fun ForYouScreen(
 }
 
 
-@SuppressLint("CoroutineCreationDuringComposition")
+
 @Composable
 fun ForYouScreenContent(
     navController: NavHostController, viewModel: SongViewModel
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    LoadingDialog(isLoading = state.isLoading)
-    Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
-        MyTopAppBar(title = {
-            Text(
-                "For You",
-                fontFamily = ubuntu,
-                fontSize = 25.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-        }, appBarLeadingIcon = painterResource(R.drawable.menu), onClick = {
-            navController.navigateUp()
-        }, action = {
-
-        })
-    }) { padding ->
+//    LoadingDialog(isLoading = state.isLoading)
+    Scaffold(
+        containerColor = Color.Black,
+        modifier = Modifier.fillMaxSize(),
+    ) { padding ->
         if (state.isLoading) {
             LoadingDialog(true)
         } else {
 
             LazyColumn(
-                modifier = Modifier.padding(padding),
+                modifier = Modifier
+                    .padding(padding)
+                    .padding(top = 10.dp),
                 contentPadding = PaddingValues(5.dp),
             ) {
 
@@ -117,58 +107,70 @@ fun SongCard(
     onClick: () -> Unit
 
 ) {
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .height(72.dp)
-        .background(Color.Black)
-        .padding(horizontal = 12.dp)
-        .clickable {
-            onClick()
-        }) {
-        Row(
-            modifier = Modifier
-//                .width(144.dp)
-                .height(48.dp)
-                .padding(horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(72.dp)
+            .padding(horizontal = 1.dp)
+            .clickable {
+                onClick()
+            },
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Black
+        )
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.CenterStart
         ) {
-            SubcomposeAsyncImage(
+            Row(
                 modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                model = BASE_URL+"assets/"+song.cover,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                loading = {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .size(50.dp)
-                            .padding(10.dp),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                },
-            )
-
-            Column(
-                modifier = Modifier.padding(horizontal = 5.dp),
+//                .width(144.dp)
+                    .height(48.dp)
+                    .padding(horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = song.name,
-                    fontFamily = ubuntu,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
+                SubcomposeAsyncImage(
+                    alignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape),
+                    model = BASE_URL + "assets/" + song.cover,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    loading = {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .padding(10.dp),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    },
                 )
+                Spacer(modifier = Modifier.width(15.dp))
+                Column(
+                    modifier = Modifier.padding(horizontal = 5.dp),
+                ) {
+                    Text(
+                        text = song.name,
+                        fontFamily = poppins,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
 
-                Text(
-                    text = song.artist,
-                    fontFamily = ubuntu,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.Gray
-                )
+                    Text(
+                        text = song.artist,
+                        fontFamily = ubuntu,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = Color.Gray
+                    )
+                }
             }
         }
+
     }
 }
 
