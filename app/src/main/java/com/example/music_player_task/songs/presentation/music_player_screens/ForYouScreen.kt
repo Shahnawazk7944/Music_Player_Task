@@ -1,12 +1,10 @@
 package com.example.music_player_task.songs.presentation.music_player_screens
 
-import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -23,8 +21,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,94 +45,102 @@ import com.example.music_player_task.navigation.Screen
 import com.example.music_player_task.songs.domain.model.Song
 import com.example.music_player_task.songs.presentation.util.components.LoadingDialog
 import com.example.music_player_task.songs.presentation.util.components.MyTopAppBar
-import com.example.music_player_task.songs.presentation.viewModels.MusicPlayerStates
 import com.example.music_player_task.songs.presentation.viewModels.MusicPlayerUiEvents
 import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
 import com.example.music_player_task.ui.ubuntu
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun ForYouScreen(
     viewModel: SongViewModel,
     navController: NavHostController,
 ) {
-
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    ForYouScreenContent(state = state, navController = navController, viewModel = viewModel)
+    ForYouScreenContent(navController = navController, viewModel = viewModel)
 }
 
 
-@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun ForYouScreenContent(
-    state: MusicPlayerStates, navController: NavHostController, viewModel: SongViewModel
+    navController: NavHostController, viewModel: SongViewModel
 ) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
     LoadingDialog(isLoading = state.isLoading)
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            MyTopAppBar(
-                title = {
-                    Text(
-                        "For You",
-                        fontFamily = ubuntu,
-                        fontSize = 25.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                },
-                appBarLeadingIcon = painterResource(R.drawable.menu),
-                onClick = {
-                    navController.navigateUp()
-                },
-                action = {
-
-                }
+    Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
+        MyTopAppBar(title = {
+            Text(
+                "For You",
+                fontFamily = ubuntu,
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
             )
-        }
-    ) { padding ->
+        }, appBarLeadingIcon = painterResource(R.drawable.menu), onClick = {
+            navController.navigateUp()
+        }, action = {
+
+        })
+    }) { padding ->
         if (state.isLoading) {
             LoadingDialog(true)
         } else {
+
             LazyColumn(
                 modifier = Modifier.padding(padding),
                 contentPadding = PaddingValues(5.dp),
             ) {
 
                 items(state.songs!!.data.size) { index ->
-                    val songImageKey = state.songs.data[index].cover
-                    viewModel.onEvent(MusicPlayerUiEvents.GetSongImage(songImageKey))
-                    Log.d("check", "${state.isSongImageLoading}")
+                    val imageloading by rememberUpdatedState(newValue = state.isSongImageLoading)
+                    val songImageKey = state.songs!!.data[index].cover
+                    var isImageLoaded by
+                    remember { mutableStateOf(false) } // Flag to track image loading
+                    Log.d("check first run", "yayayayaya")
+                    val scop = rememberCoroutineScope()
+//                    LaunchedEffect(key1 = Unit) {
+//                        Log.d("check first run", "yayayayaya 22") // Consider a more descriptive key
+//                        viewModel.state.collectLatest { updatedState ->
+//                            isImageLoaded.value = updatedState.isSongImageLoading.value
+//                        }
+//                    }
 
-                        if (state.isSongImageLoading) {
-                            Box(
-                                modifier = Modifier.fillMaxWidth(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .size(50.dp)
-                                        .padding(10.dp),
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        } else {
-                            Box(Modifier.clickable {
-                                navController.navigate(Screen.SongScreen.passToSongScreen(songImageKey))
-                            }) {
-                                SongCard(
-                                    song = state.songs.data[index],
-                                    songImages = state.songImages,
-                                    index = index,
-                                    songImage = state.songImage
-                                )
-                            }
+                    DisposableEffect(key1 = index) {
+
+                        scop.launch {
+                            viewModel.onEvent(MusicPlayerUiEvents.GetSongImage(songImageKey))
                         }
+                        onDispose {
+                            scop.cancel() // Cancel the job on dispose
+                        }
+                    }
 
+//                    var isSongImageLoading = remember {
+//                       mutableStateOf(state.isSongImageLoading)
+//                    }
+//                    Log.d("check", "${state.isSongImageLoading.hashCode()}")
+//                    viewModel.onEvent(MusicPlayerUiEvents.GetSongImage(songImageKey))
+                    // Log.d("check", "$isSongImageLoading")
+
+
+                    SongCard(
+                        song = state.songs!!.data[index],
+                        songImages = state.songImages,
+                        index = index,
+                        songImage = state.songImage,
+                        isImageLoading = state.isSongImageLoading.value
+                    ) {
+                        navController.navigate(
+                            Screen.SongScreen.passToSongScreen(
+                                songImageKey
+                            )
+                        )
+                    }
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun SongCard(
@@ -137,17 +148,30 @@ fun SongCard(
     index: Int,
     songImages: List<Bitmap?>,
     isImageLoading: Boolean = false,
-    songImage: Bitmap?
-//    state: MusicPlayerStates,
-//    index: Int
+    songImage: Bitmap?,
+    onClick: () -> Unit
+
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(72.dp)
-            .background(Color.Black)
-            .padding(horizontal = 12.dp)
-    ) {
+//    if (isImageLoading) {
+//        Box(
+//            modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
+//        ) {
+//            CircularProgressIndicator(
+//                modifier = Modifier
+//                    .size(50.dp)
+//                    .padding(10.dp),
+//                color = MaterialTheme.colorScheme.primary
+//            )
+//        }
+//    } else {
+    Card(modifier = Modifier
+        .fillMaxWidth()
+        .height(72.dp)
+        .background(Color.Black)
+        .padding(horizontal = 12.dp)
+        .clickable {
+            onClick()
+        }) {
         Row(
             modifier = Modifier
 //                .width(144.dp)
@@ -176,8 +200,7 @@ fun SongCard(
             }
 
             Column(
-                modifier = Modifier
-                    .padding(horizontal = 5.dp),
+                modifier = Modifier.padding(horizontal = 5.dp),
             ) {
                 Text(
                     text = song.name,
@@ -198,6 +221,7 @@ fun SongCard(
         }
     }
 }
+//}
 
 
 //@Preview(showBackground = true)

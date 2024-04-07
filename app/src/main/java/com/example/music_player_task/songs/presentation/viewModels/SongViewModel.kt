@@ -7,7 +7,6 @@ import com.example.music_player_task.songs.domain.repository.SongImageRepository
 import com.example.music_player_task.songs.domain.repository.SongRepository
 import com.example.music_player_task.songs.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -62,8 +61,17 @@ class SongViewModel @Inject constructor(
 
             is MusicPlayerUiEvents.GetSongImage -> {
                 viewModelScope.launch {
-                    _musicPlayerState.update { it.copy(isSongImageLoading = true) }
+                    // _musicPlayerState.update { it.copy(isSongImageLoading = true) }
+                    Log.d("checkee", "${state.value.isSongImageLoading.hashCode()}")
+                    _musicPlayerState.update {
+                        it.copy(isSongImageLoading = it.isSongImageLoading.apply {
+                            this.value = true
+                        })
+                    }
+
+
                     Log.d("check", "${state.value.isSongImageLoading}")
+                    Log.d("checkee", "${state.value.isSongImageLoading.hashCode()}")
                     songImageRepository.getSongImage(event.imageId).onRight { image ->
                         Log.d("check loaded? 2", image.toString())
                         _musicPlayerState.update {
@@ -71,7 +79,9 @@ class SongViewModel @Inject constructor(
                                 songImages = it.songImages.toMutableList().apply {
                                     add(image)
                                 },
-                                isSongImageLoading = false
+                                isSongImageLoading = it.isSongImageLoading.apply {
+                                    this.value = true
+                                }
                             )
 
                         }
