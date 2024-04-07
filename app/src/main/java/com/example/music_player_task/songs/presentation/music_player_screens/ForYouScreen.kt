@@ -21,7 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,8 +47,6 @@ import com.example.music_player_task.songs.presentation.util.components.MyTopApp
 import com.example.music_player_task.songs.presentation.viewModels.MusicPlayerUiEvents
 import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
 import com.example.music_player_task.ui.ubuntu
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun ForYouScreen(
@@ -85,6 +82,7 @@ fun ForYouScreenContent(
             LoadingDialog(true)
         } else {
 
+
             LazyColumn(
                 modifier = Modifier.padding(padding),
                 contentPadding = PaddingValues(5.dp),
@@ -92,7 +90,6 @@ fun ForYouScreenContent(
 
                 items(state.songs!!.data.size) { index ->
                     val imageloading by rememberUpdatedState(newValue = state.isSongImageLoading)
-                    val songImageKey = state.songs!!.data[index].cover
                     var isImageLoaded by
                     remember { mutableStateOf(false) } // Flag to track image loading
                     Log.d("check first run", "yayayayaya")
@@ -103,15 +100,9 @@ fun ForYouScreenContent(
 //                            isImageLoaded.value = updatedState.isSongImageLoading.value
 //                        }
 //                    }
-
-                    DisposableEffect(key1 = index) {
-
-                        scop.launch {
-                            viewModel.onEvent(MusicPlayerUiEvents.GetSongImage(songImageKey))
-                        }
-                        onDispose {
-                            scop.cancel() // Cancel the job on dispose
-                        }
+                    if (!state.isSongImageLoading.value) {
+                        val songImageKey = state.songs!!.data[index].cover
+                        viewModel.onEvent(MusicPlayerUiEvents.GetSongImage(songImageKey))
                     }
 
 //                    var isSongImageLoading = remember {
@@ -129,11 +120,12 @@ fun ForYouScreenContent(
                         songImage = state.songImage,
                         isImageLoading = state.isSongImageLoading.value
                     ) {
-                        navController.navigate(
-                            Screen.SongScreen.passToSongScreen(
-                                songImageKey
-                            )
-                        )
+                        navController.navigateUp()
+
+//                            Screen.SongScreen.passToSongScreen(
+//                                songImageKey
+//                            )
+
                     }
                 }
             }
