@@ -80,12 +80,13 @@ class SongViewModel @Inject constructor(
                                     add(image)
                                 },
                                 isSongImageLoading = it.isSongImageLoading.apply {
-                                    this.value = true
+                                    this.value = false
                                 }
                             )
 
                         }
                         Log.d("check array size", "${state.value.songImages.size}")
+                        Log.d("check for image done", "${state.value.isSongImageLoading}")
                     }.onLeft { error ->
                         _musicPlayerState.update {
                             it.copy(
