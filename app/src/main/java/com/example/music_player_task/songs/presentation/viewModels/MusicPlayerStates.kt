@@ -9,7 +9,8 @@ import com.example.music_player_task.songs.domain.model.Songs
 
 data class MusicPlayerStates(
     val isLoading: Boolean = false,
-    val isSongImageLoading: Boolean = false,
+    var isSongImageLoading: MutableState<Boolean> = mutableStateOf(false),
+   // var isSongImageLoading: Boolean = false,
     val songs: Songs? = null,
     val error: String? = null,
     var route:String = "forYou",
