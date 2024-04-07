@@ -31,83 +31,16 @@ class SongRepositoryImpl @Inject constructor(
     }
 }
 
-
-//class SongImageRepositoryImpl @Inject constructor(
-//    private val songImageApi: SongImageApi
-//) : SongImageRepository {
-//    override suspend fun getSongImage(imageId: String): Either<NetworkError, Bitmap?> {
-//        Log.d("check called getImage","with image id is $imageId")
-//        //delay(2000)
-//        return try {
-//            val image = withContext(Dispatchers.IO) {
-//                async { songImageApi.getSongImage(imageId = imageId) }.await()
-//            }
-//            Log.d("check called api","${image.body()?.bytes()}")
-//
-//            val imageBytes = image.body()?.bytes()
-//            val bitmap = imageBytes?.let { BitmapFactory.decodeByteArray(imageBytes, 0, it.size) }
-//            return Either.Right(bitmap)
-//        } catch (e: Exception) {
-//            Either.Left(e.toNetworkError())
-//        }
-//    }
-//
-//}
-
-
-//class SongImageRepositoryImpl @Inject constructor(
-//    private val songImageApi: SongImageApi
-//) : SongImageRepository {
-//    override suspend fun getSongImage(imageId: String): Either<ImageNetworkError, Bitmap?> {
-//        Log.d("check called getImage", "with image id is $imageId")
-//
-//        return try {
-//            runBlocking {
-//                val imageResponse =
-//                    async { songImageApi.getSongImage(imageId = imageId) }.await()
-//
-//                Log.d("check called api", "${imageResponse.code()}")
-//
-//
-//                if (imageResponse.isSuccessful) {
-//                    val imageBytes = imageResponse.body()?.bytes()
-//                    return@runBlocking imageBytes?.let {
-//                        val bitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
-//                        Log.d("check loaded?", bitmap.toString())
-//                        Either.Right(bitmap)
-//                    } ?: Either.Left("Image fetched but something went wrong".toImageNetworkError())
-//                } else {
-//                    return@runBlocking Either.Left(imageResponse.code().toString().toImageNetworkError())
-//                }
-//            }
-////            delay(3000)
-//
-//        } catch (e: Exception) {
-//            Either.Left(e.message!!.toImageNetworkError())
-//        }
-//    }
-//}
-
-
 class SongImageRepositoryImpl @Inject constructor(
     private val songImageApi: SongImageApi
 ) : SongImageRepository {
     override suspend fun getSongImage(imageId: String): Either<ImageNetworkError, Bitmap?> {
-        Log.d("check called getImage", "with image id is $imageId")
-
         return try {
-//            val imageRes = withContext(Dispatchers.IO) {
-//                async { songImageApi.getSongImage(imageId = imageId) }
-//            }
-//            val imageResponse = imageRes.await()
             val imageResponse =  songImageApi.getSongImage(imageId = imageId)
-
-            Log.d("check called api", "${imageResponse.code()}")
             if (imageResponse.isSuccessful) {
                 val imageBytes = imageResponse.body()?.bytes()
                 return imageBytes?.let {
                     val bitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
-                    Log.d("check loaded?", bitmap.toString())
                     Either.Right(bitmap)
                 } ?: Either.Left("Image fetched but something went wrong".toImageNetworkError())
             } else {
@@ -115,9 +48,6 @@ class SongImageRepositoryImpl @Inject constructor(
                     imageResponse.code().toString().toImageNetworkError()
                 )
             }
-
-//            delay(3000)
-
         } catch (e: Exception) {
             Either.Left(e.message!!.toImageNetworkError())
         }

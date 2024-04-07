@@ -61,49 +61,31 @@ class SongViewModel @Inject constructor(
 
             is MusicPlayerUiEvents.GetSongImage -> {
                 viewModelScope.launch {
-                    // _musicPlayerState.update { it.copy(isSongImageLoading = true) }
-                    Log.d("checkee", "${state.value.isSongImageLoading.hashCode()}")
-                    _musicPlayerState.update {
-                        it.copy(isSongImageLoading = it.isSongImageLoading.apply {
-                            this.value = true
-                        })
-                    }
+                    _musicPlayerState.update { it.copy(isSongImageLoading = true) }
 
-
-                    Log.d("check", "${state.value.isSongImageLoading}")
-                    Log.d("checkee", "${state.value.isSongImageLoading.hashCode()}")
                     songImageRepository.getSongImage(event.imageId).onRight { image ->
-                        Log.d("check loaded? 2", image.toString())
                         _musicPlayerState.update {
                             it.copy(
                                 songImages = it.songImages.toMutableList().apply {
                                     add(image)
                                 },
-                                isSongImageLoading = it.isSongImageLoading.apply {
-                                    this.value = false
-                                }
+                                isSongImageLoading = false
                             )
 
                         }
-                        Log.d("check array size", "${state.value.songImages.size}")
-                        Log.d("check for image done", "${state.value.isSongImageLoading}")
                     }.onLeft { error ->
                         _musicPlayerState.update {
                             it.copy(
                                 error = error.error.message,
-                                // isSongImageLoading = false
+                                isSongImageLoading = false
                             )
                         }
                         sendEvent(event = Event.Toast(error.error.message))
                     }
                 }
-                Log.d("check after", "${state.value.isSongImageLoading}")
 
             }
-
-
         }
-
 
     }
 
