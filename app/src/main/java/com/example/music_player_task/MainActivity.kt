@@ -102,6 +102,18 @@ class MainActivity : ComponentActivity() {
                                         navController.navigate(Screen.ForYou.route)
                                     },
                                     icon = {
+                                        Text(
+                                            text = "For You",
+                                            fontFamily = ubuntu,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier
+                                                .padding(horizontal = 5.dp)
+                                        )
+
+                                    },
+                                    label = {
+                                        if(state.route =="forYou"){
                                         Icon(
                                             painter = painterResource(R.drawable.dottt),
                                             contentDescription = null,
@@ -109,17 +121,7 @@ class MainActivity : ComponentActivity() {
                                                 .size(20.dp)
                                                 .align(Alignment.Top)
                                                 .padding(horizontal = 5.dp)
-                                        )
-                                    },
-                                    label = {
-                                            Text(
-                                                text = "For You",
-                                                fontFamily = ubuntu,
-                                                fontSize = 16.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                modifier = Modifier
-                                                    .padding(horizontal = 5.dp)
-                                            )
+                                        )}
                                     },
 
                                 )
@@ -138,6 +140,19 @@ class MainActivity : ComponentActivity() {
                                         navController.navigate(Screen.TopTrack.route)
                                     },
                                     icon = {
+
+                                            Text(
+                                                text = "Top Tracks",
+                                                fontFamily = ubuntu,
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier
+                                                    .padding(horizontal = 5.dp)
+                                            )
+
+                                    },
+                                    label = {
+                                        if(state.route =="topTrack" ){
                                         Icon(
                                             painter = painterResource(R.drawable.dottt),
                                             contentDescription = null,
@@ -146,16 +161,7 @@ class MainActivity : ComponentActivity() {
                                                 .align(Alignment.Top)
                                                 .padding(horizontal = 5.dp)
                                         )
-                                    },
-                                    label = {
-                                        Text(
-                                            text = "Top Tracks",
-                                            fontFamily = ubuntu,
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            modifier = Modifier
-                                                .padding(horizontal = 5.dp)
-                                        )
+                                        }
                                     },
                                 )
                             }
