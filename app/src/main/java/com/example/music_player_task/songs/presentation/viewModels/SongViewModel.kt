@@ -1,5 +1,6 @@
 package com.example.music_player_task.songs.presentation.viewModels
 
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -51,85 +52,98 @@ class SongViewModel @Inject constructor(
         }
     }
 
-
+    private var mediaPlayer: MediaPlayer? = null
+    val mediaMetadataRetriever = MediaMetadataRetriever()
+    private var currentPosition = 0
     fun onEvent(event: MusicPlayerUiEvents) {
         when (event) {
+
+            is MusicPlayerUiEvents.PlaySong -> {
+                    mediaPlayer?.let {
+                        if (it.isPlaying) {
+                            mediaPlayer?.stop()
+                            mediaPlayer?.reset()
+                        }
+                    }
+                    mediaPlayer?.release()
+                    mediaMetadataRetriever.setDataSource(event.url, null) // Set the URL as the data source
+                    val durationString =
+                        mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                    mediaMetadataRetriever.release()
+                    val duration = durationString?.toLong() ?: 0
+                    mediaPlayer = MediaPlayer().apply {
+                        setDataSource(event.url)
+                        prepareAsync()
+                    }
+                    mediaPlayer?.setOnPreparedListener { mediaPlayer ->
+                        mediaPlayer.seekTo(currentPosition)
+                        mediaPlayer.start()
+                    }
+
+            }
+
+
+            is MusicPlayerUiEvents.PauseSong -> {
+                    mediaPlayer?.let {
+                        currentPosition = it.currentPosition
+                        it.pause()
+                    }
+            }
+
+            is MusicPlayerUiEvents.StopSong -> {
+                    mediaPlayer?.stop()
+                    mediaPlayer?.reset()
+                    currentPosition = 0
+            }
+
+            is MusicPlayerUiEvents.ReleasePlayer -> {
+                    mediaPlayer?.reset()
+                    mediaPlayer?.release()
+                    mediaPlayer = null
+                    currentPosition = 0
+            }
+
             is MusicPlayerUiEvents.NavigateTo -> {
                 _musicPlayerState.update {
                     it.copy(route = event.route)
                 }
             }
-
-            is MusicPlayerUiEvents.GetSongImage -> {
-                viewModelScope.launch {
-                    _musicPlayerState.update { it.copy(isSongImageLoading = true) }
-
-                    songImageRepository.getSongImage(event.imageId).onRight { image ->
-                        _musicPlayerState.update {
-                            it.copy(
-                                songImages = it.songImages.toMutableList().apply {
-                                    add(image)
-                                },
-                                isSongImageLoading = false
-                            )
-
+            is MusicPlayerUiEvents.SelectTheSong -> {
+                _musicPlayerState.update {
+                    it.copy(
+                        selectTheSong = it.selectTheSong.apply {
+                            this.value = event.selectTheSong
                         }
-                    }.onLeft { error ->
-                        _musicPlayerState.update {
-                            it.copy(
-                                error = error.error.message,
-                                isSongImageLoading = false
-                            )
-                        }
-                        sendEvent(event = Event.Toast(error.error.message))
-                    }
+                    )
                 }
-
             }
+
+//            is MusicPlayerUiEvents.GetSongImage -> {
+//                viewModelScope.launch {
+//                    _musicPlayerState.update { it.copy(isSongImageLoading = true) }
+//
+//                    songImageRepository.getSongImage(event.imageId).onRight { image ->
+//                        _musicPlayerState.update {
+//                            it.copy(
+//                                songImages = it.songImages.toMutableList().apply {
+//                                    add(image)
+//                                }, isSongImageLoading = false
+//                            )
+//
+//                        }
+//                    }.onLeft { error ->
+//                        _musicPlayerState.update {
+//                            it.copy(
+//                                error = error.error.message, isSongImageLoading = false
+//                            )
+//                        }
+//                        sendEvent(event = Event.Toast(error.error.message))
+//                    }
+//                }
+//
+//            }
         }
 
-    }
-
-
-    private var mediaPlayer: MediaPlayer? = null
-    private var currentPosition = 0
-
-    fun playStream(url: String) {
-        mediaPlayer?.let {
-            if(it.isPlaying) {
-                mediaPlayer?.stop()
-                mediaPlayer?.reset()
-            }
-        }
-        mediaPlayer?.release()
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(url)
-            prepareAsync()
-        }
-        mediaPlayer?.setOnPreparedListener { mediaPlayer ->
-            mediaPlayer.seekTo(currentPosition)
-            mediaPlayer.start()
-        }
-    }
-
-    fun pauseStream() {
-        mediaPlayer?.let {
-            currentPosition = it.currentPosition
-            it.pause()
-        }
-    }
-
-    fun stopStream() {
-        mediaPlayer?.stop()
-        mediaPlayer?.reset()
-        currentPosition = 0
-    }
-
-    fun releasePlayer() {
-        mediaPlayer?.reset()
-        mediaPlayer?.release()
-        mediaPlayer = null
-        currentPosition = 0
     }
 
 }

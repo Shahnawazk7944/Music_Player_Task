@@ -1,7 +1,14 @@
 package com.example.music_player_task.songs.presentation.music_player_screens
 
-import android.annotation.SuppressLint
-import android.graphics.Bitmap
+import android.util.Log
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,28 +27,41 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
+import com.example.music_player_task.R
 import com.example.music_player_task.songs.domain.model.Song
 import com.example.music_player_task.songs.presentation.util.components.LoadingDialog
+import com.example.music_player_task.songs.presentation.viewModels.MusicPlayerUiEvents
 import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
 import com.example.music_player_task.songs.util.Constant.BASE_URL
 import com.example.music_player_task.ui.poppins
 import com.example.music_player_task.ui.ubuntu
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun ForYouScreen(
@@ -50,7 +70,6 @@ internal fun ForYouScreen(
 ) {
     ForYouScreenContent(navController = navController, viewModel = viewModel)
 }
-
 
 
 @Composable
@@ -63,10 +82,14 @@ fun ForYouScreenContent(
         containerColor = Color.Black,
         modifier = Modifier.fillMaxSize(),
     ) { padding ->
+
         if (state.isLoading) {
             LoadingDialog(true)
         } else {
-
+//            var selectedSong by remember {
+//                mutableStateOf<Song?>(null)
+//            }
+            Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier
                     .padding(padding)
@@ -78,33 +101,186 @@ fun ForYouScreenContent(
 
                     SongCard(
                         song = state.songs!!.data[index],
-                        songImages = state.songImages,
                         index = index,
-                        songImage = state.songImage,
-                        isImageLoading = state.isSongImageLoading
-                    ) {
-                        navController.navigateUp()
 
-//                            Screen.SongScreen.passToSongScreen(
-//                                songImageKey
-//                            )
+                        ) { index, song ->
+                        Log.d("check", song.name)
+                        viewModel.onEvent(event = MusicPlayerUiEvents.SelectTheSong(song))
+                        Log.d("check 2", state.selectTheSong.value!!.name)
 
                     }
+                }
+            }
+        }
+            state.selectTheSong.value?.let {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                SongPlayPauseCard(song = it)
                 }
             }
         }
     }
 }
 
+@Composable
+fun SongPlayPauseCard(song: Song) {
+    var isSongPlaying by remember {
+        mutableStateOf(false)
+    }
+    if (isSongPlaying) {
+
+    } else {
+
+    }
+    val songImageRotation= rememberInfiniteTransition(label = "")
+    val angle by songImageRotation.animateFloat(
+        initialValue = 0F,
+        targetValue = 360F,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = LinearEasing)
+        ), label = ""
+    )
+    val cardBackgroundColor = Brush.horizontalGradient(
+        colors = listOf(
+            Color(0xFF436c89),
+            Color(0xFF8b2c40)
+        )
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(72.dp)
+            .padding(horizontal = 1.dp)
+            .background(cardBackgroundColor)
+            .clickable {
+
+            },
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Row(
+                modifier = Modifier
+//                .width(144.dp)
+                    .height(48.dp)
+                    .padding(horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+
+                ///Song Image ------------------------
+
+                    if (isSongPlaying) {
+                        Box(modifier = Modifier.graphicsLayer {
+                            rotationZ = angle
+                        }){
+                            SubcomposeAsyncImage(
+                                alignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape),
+                                model = BASE_URL + "assets/" + song.cover,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                loading = {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .size(50.dp)
+                                            .padding(10.dp),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                },
+                            )}
+                    } else {
+                        Box(modifier = Modifier){
+                            SubcomposeAsyncImage(
+                                alignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape),
+                                model = BASE_URL + "assets/" + song.cover,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                loading = {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .size(50.dp)
+                                            .padding(10.dp),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                },
+                            )}
+                    }
+
+                /// Song Details -----------------
+                Spacer(modifier = Modifier.width(15.dp))
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 5.dp)
+                        .weight(1f),
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = song.name,
+                        fontFamily = poppins,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+
+//                    Text(
+//                        text = song.artist,
+//                        fontFamily = ubuntu,
+//                        fontSize = 14.sp,
+//                        fontWeight = FontWeight.Normal,
+//                        color = Color.Gray
+//                    )
+                }
+
+
+                /// Song Play Pause --------------------
+                if (isSongPlaying) {
+                    IconButton(onClick = { /*TODO*/ }) {
+
+                        Icon(
+                            painter = painterResource(R.drawable.play),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .weight(4f),
+                            tint = Color.Unspecified
+                        )
+                    }
+                } else {
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Icon(
+                            painter = painterResource(R.drawable.pause),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .weight(4f),
+                            tint = Color.Unspecified
+                        )
+                    }
+                }
+
+            }
+        }
+
+    }
+
+
+}
 
 @Composable
 fun SongCard(
     song: Song,
     index: Int,
-    songImages: List<Bitmap?>,
-    isImageLoading: Boolean = false,
-    songImage: Bitmap?,
-    onClick: () -> Unit
+    onClick: (index: Int, song: Song) -> Unit
 
 ) {
     Card(
@@ -113,7 +289,7 @@ fun SongCard(
             .height(72.dp)
             .padding(horizontal = 1.dp)
             .clickable {
-                onClick()
+                onClick(index, song)
             },
         colors = CardDefaults.cardColors(
             containerColor = Color.Black

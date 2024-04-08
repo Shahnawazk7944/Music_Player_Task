@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -85,7 +86,9 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         containerColor = Color.Black,
                         bottomBar = {
-                            NavigationBar {
+                            NavigationBar(
+                                containerColor = Color.Black
+                            ){
 
                                 NavigationBarItem(
                                    colors = NavigationBarItemDefaults.colors(
@@ -121,7 +124,8 @@ class MainActivity : ComponentActivity() {
                                                 .size(20.dp)
                                                 .align(Alignment.Top)
                                                 .padding(horizontal = 5.dp)
-                                        )}
+                                        )
+                                        }
                                     },
 
                                 )
