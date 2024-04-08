@@ -41,12 +41,11 @@ fun TopTrack(
                     if(state.songs!!.data[index].top_track){
                         SongCard(
                             song = state.songs!!.data[index],
-                            songImages = state.songImages,
+
                             index = index,
-                            songImage = state.songImage,
-                            isImageLoading = state.isSongImageLoading
-                        ) {
-                            navController.navigateUp()
+
+                        ) { index, song ->
+
 
 //                            Screen.SongScreen.passToSongScreen(
 //                                songImageKey
