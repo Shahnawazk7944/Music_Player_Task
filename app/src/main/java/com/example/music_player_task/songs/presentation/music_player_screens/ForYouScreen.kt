@@ -65,6 +65,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
@@ -79,6 +80,7 @@ import com.example.music_player_task.ui.poppins
 import com.example.music_player_task.ui.ubuntu
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
+import kotlin.math.absoluteValue
 
 @Composable
 internal fun ForYouScreen(
@@ -297,22 +299,39 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
             .fillMaxSize()
     ) {
         Box(
-            modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
+            modifier = Modifier.fillMaxWidth().padding(top = 50.dp), contentAlignment = Alignment.Center
         ) {
             HorizontalPager(
-                modifier = Modifier
-                    .padding(horizontal = 10.dp),
+                modifier = Modifier,
+                contentPadding = PaddingValues(horizontal = 60.dp),
                 state = pagerState,
                 pageSize = PageSize.Fixed(300.dp),
-                pageSpacing = 40.dp,
-                verticalAlignment = Alignment.Bottom
+                //pageSpacing = 10.dp,
+                verticalAlignment = Alignment.Bottom,
 
             ) { page ->
                 SubcomposeAsyncImage(
                     alignment = Alignment.Center,
                     modifier = Modifier
                         .size(300.dp)
-                        .clip(RoundedCornerShape(16.dp)),
+                        .padding(horizontal = 20.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .graphicsLayer {
+                            val pageOffSet = (
+                                    (pagerState.currentPage - page) + pagerState
+                                        .currentPageOffsetFraction
+                                    ).absoluteValue
+                            alpha = lerp(
+                                start = 0.5f,
+                                stop = 1f,
+                                fraction = 1f - pageOffSet.coerceIn(0f, 1f)
+                            )
+                            scaleY = lerp(
+                                start = 0.75f,
+                                stop = 1f,
+                                fraction = 1f - pageOffSet.coerceIn(0f, 1f)
+                            )
+                        },
                     model = BASE_URL + "assets/" + state.songs!!.data[page].cover,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
