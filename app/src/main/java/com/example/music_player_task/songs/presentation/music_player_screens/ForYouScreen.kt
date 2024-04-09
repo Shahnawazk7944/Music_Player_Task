@@ -1,10 +1,7 @@
 package com.example.music_player_task.songs.presentation.music_player_screens
 
-import android.util.Log
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -33,12 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,12 +48,12 @@ import coil.compose.SubcomposeAsyncImage
 import com.example.music_player_task.R
 import com.example.music_player_task.songs.domain.model.Song
 import com.example.music_player_task.songs.presentation.util.components.LoadingDialog
+import com.example.music_player_task.songs.presentation.viewModels.MusicPlayerStates
 import com.example.music_player_task.songs.presentation.viewModels.MusicPlayerUiEvents
 import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
 import com.example.music_player_task.songs.util.Constant.BASE_URL
 import com.example.music_player_task.ui.poppins
 import com.example.music_player_task.ui.ubuntu
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun ForYouScreen(
@@ -86,55 +78,67 @@ fun ForYouScreenContent(
         if (state.isLoading) {
             LoadingDialog(true)
         } else {
-//            var selectedSong by remember {
-//                mutableStateOf<Song?>(null)
-//            }
-            Box(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
+            Column(
                 modifier = Modifier
-                    .padding(padding)
-                    .padding(top = 10.dp),
-                contentPadding = PaddingValues(5.dp),
+                    .fillMaxSize()
             ) {
+                Box(modifier = Modifier.weight(1f)) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .padding(padding)
+                            .padding(top = 10.dp),
+                        contentPadding = PaddingValues(5.dp),
+                    ) {
 
-                items(state.songs!!.data.size) { index ->
+                        items(state.songs!!.data.size) { index ->
 
-                    SongCard(
-                        song = state.songs!!.data[index],
-                        index = index,
+                            SongCard(
+                                song = state.songs!!.data[index],
+                                index = index,
 
-                        ) { index, song ->
-                        Log.d("check", song.name)
-                        viewModel.onEvent(event = MusicPlayerUiEvents.SelectTheSong(song))
-                        Log.d("check 2", state.selectTheSong.value!!.name)
+                                ) { index, song ->
+                                viewModel.onEvent(event = MusicPlayerUiEvents.SelectTheSong(state.songs!!.data[index]))
+                                viewModel.onEvent(event = MusicPlayerUiEvents.PlaySong(state.songs!!.data[index].url))
 
+
+                            }
+                        }
                     }
                 }
-            }
-        }
-            state.selectTheSong.value?.let {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.BottomCenter
-                ) {
-                SongPlayPauseCard(song = it)
+
+                state.selectTheSong.value?.let { song ->
+                    Box(
+                        modifier = Modifier,
+                        //contentAlignment = Alignment.BottomCenter
+                    ) {
+                        SongPlayPauseCard(song = song, state) {
+                            if (it) {
+                                viewModel.onEvent(event = MusicPlayerUiEvents.IsSongPlaying(false))
+                                viewModel.onEvent(event = MusicPlayerUiEvents.PauseSong(true))
+                            } else {
+                                viewModel.onEvent(event = MusicPlayerUiEvents.IsSongPlaying(true))
+                                viewModel.onEvent(event = MusicPlayerUiEvents.PauseSong(false))
+                            }
+                        }
+                    }
                 }
+
             }
         }
     }
 }
 
 @Composable
-fun SongPlayPauseCard(song: Song) {
-    var isSongPlaying by remember {
-        mutableStateOf(false)
-    }
-    if (isSongPlaying) {
-
-    } else {
-
-    }
-    val songImageRotation= rememberInfiniteTransition(label = "")
+fun SongPlayPauseCard(song: Song, state: MusicPlayerStates, pauseSong: (pausedSong: Boolean) -> Unit,) {
+//    var state by remember {
+//        mutableStateOf(true)
+//    }
+//    if (state.isSongPlaying.value) {
+//        pauseSong(false)
+//    } else {
+//        pauseSong(true)
+//    }
+    val songImageRotation = rememberInfiniteTransition(label = "")
     val angle by songImageRotation.animateFloat(
         initialValue = 0F,
         targetValue = 360F,
@@ -173,47 +177,51 @@ fun SongPlayPauseCard(song: Song) {
 
                 ///Song Image ------------------------
 
-                    if (isSongPlaying) {
-                        Box(modifier = Modifier.graphicsLayer {
-                            rotationZ = angle
-                        }){
-                            SubcomposeAsyncImage(
-                                alignment = Alignment.Center,
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(CircleShape),
-                                model = BASE_URL + "assets/" + song.cover,
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                loading = {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier
-                                            .size(50.dp)
-                                            .padding(10.dp),
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                },
-                            )}
-                    } else {
-                        Box(modifier = Modifier){
-                            SubcomposeAsyncImage(
-                                alignment = Alignment.Center,
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(CircleShape),
-                                model = BASE_URL + "assets/" + song.cover,
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                loading = {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier
-                                            .size(50.dp)
-                                            .padding(10.dp),
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                },
-                            )}
+                if (state.isSongPlaying.value) {
+                    Box(modifier = Modifier.graphicsLayer {
+                        rotationZ = angle
+                    }) {
+                        SubcomposeAsyncImage(
+                            alignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape),
+                            model = BASE_URL + "assets/" + song.cover,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            loading = {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(50.dp)
+                                        .padding(10.dp),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            },
+                        )
                     }
+                } else {
+                    Box(modifier = Modifier) {
+                        SubcomposeAsyncImage(
+                            alignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape),
+                            model = BASE_URL + "assets/" + song.cover,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            loading = {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(50.dp)
+                                        .padding(10.dp),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            },
+                        )
+                    }
+                }
+
+
 
                 /// Song Details -----------------
                 Spacer(modifier = Modifier.width(15.dp))
@@ -243,11 +251,12 @@ fun SongPlayPauseCard(song: Song) {
 
 
                 /// Song Play Pause --------------------
-                if (isSongPlaying) {
-                    IconButton(onClick = { /*TODO*/ }) {
-
+                if (state.isSongPlaying.value) {
+                    IconButton(onClick = {
+                        pauseSong(true)
+                    }) {
                         Icon(
-                            painter = painterResource(R.drawable.play),
+                            painter = painterResource(R.drawable.pause),
                             contentDescription = null,
                             modifier = Modifier
                                 .size(40.dp)
@@ -256,9 +265,11 @@ fun SongPlayPauseCard(song: Song) {
                         )
                     }
                 } else {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = {
+                        pauseSong(false)
+                    }) {
                         Icon(
-                            painter = painterResource(R.drawable.pause),
+                            painter = painterResource(R.drawable.play),
                             contentDescription = null,
                             modifier = Modifier
                                 .size(40.dp)

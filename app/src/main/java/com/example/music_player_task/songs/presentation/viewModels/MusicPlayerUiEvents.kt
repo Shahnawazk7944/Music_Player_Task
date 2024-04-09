@@ -10,4 +10,5 @@ sealed class MusicPlayerUiEvents {
     data class StopSong(val isStop :Boolean) : MusicPlayerUiEvents()
     data class ReleasePlayer(val releasePlayer:Boolean) : MusicPlayerUiEvents()
     data class SelectTheSong(val selectTheSong: Song) : MusicPlayerUiEvents()
+    data class IsSongPlaying(val isSongPlaying:Boolean) : MusicPlayerUiEvents()
 }
