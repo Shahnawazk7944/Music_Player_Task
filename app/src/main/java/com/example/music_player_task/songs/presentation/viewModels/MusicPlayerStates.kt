@@ -16,6 +16,7 @@ data class MusicPlayerStates(
     var route:String = "forYou",
     var songImage: Bitmap? = null,
     var songImages: MutableList<Bitmap?> = mutableListOf(),
-    var selectTheSong : MutableState<Song?> = mutableStateOf(null)
+    var selectTheSong : MutableState<Song?> = mutableStateOf(null),
+    var isSongPlaying : MutableState<Boolean> = mutableStateOf(true)
 )
 

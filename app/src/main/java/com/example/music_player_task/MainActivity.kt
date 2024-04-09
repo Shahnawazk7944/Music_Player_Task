@@ -96,7 +96,7 @@ class MainActivity : ComponentActivity() {
                                        unselectedIconColor = Color.Gray,
                                        selectedTextColor = Color.White,
                                        unselectedTextColor = Color.Gray,
-                                       indicatorColor = MaterialTheme.colorScheme.inverseOnSurface
+                                       indicatorColor = Color.Black
                                    ),
                                     enabled = true,
                                     selected = state.route == "forYou",
@@ -136,7 +136,8 @@ class MainActivity : ComponentActivity() {
                                         unselectedIconColor = Color.Gray,
                                         selectedTextColor = Color.White,
                                         unselectedTextColor = Color.Gray,
-                                        indicatorColor = MaterialTheme.colorScheme.inverseOnSurface
+                                        indicatorColor = Color.Black
+
                                     ),
                                     selected = state.route == "topTrack",
                                     onClick = {

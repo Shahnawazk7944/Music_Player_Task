@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.internal.wait
 import javax.inject.Inject
 
 @HiltViewModel
@@ -61,16 +62,20 @@ class SongViewModel @Inject constructor(
             is MusicPlayerUiEvents.PlaySong -> {
                     mediaPlayer?.let {
                         if (it.isPlaying) {
+                            Log.d("check for song duration", "song stop")
                             mediaPlayer?.stop()
                             mediaPlayer?.reset()
+                            currentPosition = 0
                         }
                     }
+                _musicPlayerState.update {
+                    it.copy(
+                        isSongPlaying = it.isSongPlaying.apply {
+                            this.value = true
+                        }
+                    )
+                }
                     mediaPlayer?.release()
-                    mediaMetadataRetriever.setDataSource(event.url, null) // Set the URL as the data source
-                    val durationString =
-                        mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-                    mediaMetadataRetriever.release()
-                    val duration = durationString?.toLong() ?: 0
                     mediaPlayer = MediaPlayer().apply {
                         setDataSource(event.url)
                         prepareAsync()
@@ -78,15 +83,23 @@ class SongViewModel @Inject constructor(
                     mediaPlayer?.setOnPreparedListener { mediaPlayer ->
                         mediaPlayer.seekTo(currentPosition)
                         mediaPlayer.start()
+                        Log.d("check for song duration", "${mediaPlayer.duration}")
                     }
-
             }
 
 
             is MusicPlayerUiEvents.PauseSong -> {
+
                     mediaPlayer?.let {
+                        Log.d("check for current position", "$currentPosition")
                         currentPosition = it.currentPosition
-                        it.pause()
+                        Log.d("check for current position after", "$currentPosition")
+                        if (event.isPause) {
+                            it.pause()
+                        } else {
+                            it.seekTo(currentPosition)
+                            it.start()
+                        }
                     }
             }
 
@@ -117,6 +130,16 @@ class SongViewModel @Inject constructor(
                     )
                 }
             }
+            is MusicPlayerUiEvents.IsSongPlaying -> {
+                _musicPlayerState.update {
+                    it.copy(
+                        isSongPlaying = it.isSongPlaying.apply {
+                            this.value = event.isSongPlaying
+                        }
+                    )
+                }
+            }
+
 
 //            is MusicPlayerUiEvents.GetSongImage -> {
 //                viewModelScope.launch {
