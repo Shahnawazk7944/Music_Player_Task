@@ -10,9 +10,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -55,7 +58,8 @@ class MainActivity : ComponentActivity() {
     private val songViewModel by viewModels<SongViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        WindowCompat.setDecorFitsSystemWindows(window, false)
+       WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContent {
 
             val lifecyclleOwner = LocalLifecycleOwner.current.lifecycle
@@ -85,6 +89,7 @@ class MainActivity : ComponentActivity() {
 
 
                     Scaffold(
+                        modifier = Modifier,
                         containerColor = Color.Black,
                         bottomBar = {
                             NavigationBar(
