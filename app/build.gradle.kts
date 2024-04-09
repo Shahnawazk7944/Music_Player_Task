@@ -98,7 +98,9 @@ dependencies {
 
     //Material extended icon
     implementation(libs.androidx.material.icons.extended.android)
+    //Palette
     implementation(libs.androidx.palette)
+    implementation(libs.accompanist.systemuicontroller)
 
 
 }

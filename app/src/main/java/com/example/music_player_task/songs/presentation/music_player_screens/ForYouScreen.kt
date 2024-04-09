@@ -6,28 +6,38 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.onConsumedWindowInsetsChanged
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -41,6 +51,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,6 +81,7 @@ import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
 import com.example.music_player_task.songs.util.Constant.BASE_URL
 import com.example.music_player_task.ui.poppins
 import com.example.music_player_task.ui.ubuntu
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 
 @Composable
@@ -81,7 +93,7 @@ internal fun ForYouScreen(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ForYouScreenContent(
     navController: NavHostController, viewModel: SongViewModel
@@ -91,9 +103,18 @@ fun ForYouScreenContent(
     val context = LocalContext.current
     Scaffold(
         containerColor = Color.Black,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
+        //.windowInsetsPadding(WindowInsets.statusBarsIgnoringVisibility),
     ) { padding ->
+        val systemUiController = rememberSystemUiController()
+        val useDarkIcons = isSystemInDarkTheme()
 
+        SideEffect {
+            systemUiController.setSystemBarsColor(
+                color = Color.Black,
+                //darkIcons = !useDarkIcons
+            )
+        }
         val playingSongSheetState = rememberModalBottomSheetState(
 
             skipPartiallyExpanded = true
@@ -167,16 +188,32 @@ fun ForYouScreenContent(
                 onDismissRequest = {
                     openSongSheet = false
                 },
-                Modifier.fillMaxHeight(),
-//                    .windowInsetsPadding(WindowInsets.statusBars),
-                //.statusBarsPadding(),
+                Modifier
+                    .fillMaxHeight()
+                    .windowInsetsPadding(WindowInsets.statusBars),
+
                 containerColor = Color.White,
                 sheetState = playingSongSheetState,
                 shape = BottomSheetDefaults.HiddenShape,
                 scrimColor = Color.Black,
-//                dragHandle = {},
-                windowInsets = WindowInsets.statusBars.
+                dragHandle = {
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF436c89)),
+                        contentAlignment = Alignment.Center
+                        ){
+                    Icon(
+                        imageVector = Icons.Filled.DragHandle,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(40.dp),
+                        tint = Color.White
+                    )}
+
+                },
+//               windowInsets =
             ) {
+
                 PlayingSongSheet(songIndex = state.playingSongIndex.value, state) {
                     scope.launch { playingSongSheetState.hide() }
                         .invokeOnCompletion {
@@ -186,6 +223,7 @@ fun ForYouScreenContent(
                         }
 
                 }
+
             }
         }
     }
@@ -197,13 +235,26 @@ fun ForYouScreenContent(
 //    val palette = Palette.from(bitmap).dominantSwatch ?: return emptyList()
 //    return listOf(palette.rgb, palette.bodyTextColor) // Extract dominant colors
 //}
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () -> Unit) {
     val context = LocalContext.current
     var gradientColors by remember {
         mutableStateOf<List<Color>>(emptyList())
     }
+    val systemUiController = rememberSystemUiController()
+    val useDarkIcons = isSystemInDarkTheme()
 
+    SideEffect {
+        // Update all of the system bar colors to be transparent, and use
+        // dark icons if we're in light theme
+        systemUiController.setSystemBarsColor(
+            color = Color(0xFF436c89),
+            darkIcons = !useDarkIcons
+        )
+
+        // setStatusBarsColor() and setNavigationBarsColor() also exist
+    }
 //    val painter = rememberAsyncImagePainter(
 //        model = ImageRequest.Builder(context)
 //            .data(state.songs!!.data[songIndex].url)
@@ -229,7 +280,6 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
 //        gradientColors = colors
 //    }
 
-    Log.d("check", "cross image call 3333")
     val sheetBackground = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF436c89),
@@ -237,11 +287,63 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
         )
     )
 
-    Box(
+    val pagerState = rememberPagerState(pageCount = {
+       state.songs!!.data.size
+    })
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top,
         modifier = Modifier
-            .fillMaxSize()
             .background(sheetBackground)
-    )
+            .fillMaxSize()
+    ) {
+        HorizontalPager(
+            state = pagerState,
+            pageSize = PageSize.Fixed(200.dp),
+            pageSpacing = 20.dp
+        ) { page ->
+            val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
+
+            Box(Modifier.background(Color.Black)) {
+                SubcomposeAsyncImage(
+                    alignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(300.dp)
+                        .clip(RoundedCornerShape(5.dp)),
+                    model = BASE_URL + "assets/" + state.songs!!.data[page].url,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    loading = {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .padding(10.dp),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                )
+            }
+        }
+        Box(Modifier.background(Color.Black)) {
+        SubcomposeAsyncImage(
+            alignment = Alignment.Center,
+            modifier = Modifier
+                .size(300.dp)
+                .clip(RoundedCornerShape(5.dp)),
+            model = BASE_URL + "assets/" + state.songs!!.data[songIndex].url,
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            loading = {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .padding(10.dp),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            },
+        )}
+    }
 }
 
 @Composable
