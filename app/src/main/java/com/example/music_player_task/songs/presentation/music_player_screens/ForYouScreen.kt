@@ -1,5 +1,6 @@
 package com.example.music_player_task.songs.presentation.music_player_screens
 
+import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -13,24 +14,38 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +53,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,6 +70,7 @@ import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
 import com.example.music_player_task.songs.util.Constant.BASE_URL
 import com.example.music_player_task.ui.poppins
 import com.example.music_player_task.ui.ubuntu
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun ForYouScreen(
@@ -64,17 +81,27 @@ internal fun ForYouScreen(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForYouScreenContent(
     navController: NavHostController, viewModel: SongViewModel
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 //    LoadingDialog(isLoading = state.isLoading)
+    val context = LocalContext.current
     Scaffold(
         containerColor = Color.Black,
         modifier = Modifier.fillMaxSize(),
     ) { padding ->
 
+        val playingSongSheetState = rememberModalBottomSheetState(
+
+            skipPartiallyExpanded = true
+            // skipPartiallyExpanded = true for opening bottom sheet
+            // state at fixed sized
+        )
+        val scope = rememberCoroutineScope()
+        var openSongSheet by remember { mutableStateOf(false) }
         if (state.isLoading) {
             LoadingDialog(true)
         } else {
@@ -97,8 +124,10 @@ fun ForYouScreenContent(
                                 index = index,
 
                                 ) { index, song ->
+                                // viewModel.onEvent(event = MusicPlayerUiEvents.GetColorsFromImage(imageUrl = state.songs!!.data[index].url,context))
                                 viewModel.onEvent(event = MusicPlayerUiEvents.SelectTheSong(state.songs!!.data[index]))
                                 viewModel.onEvent(event = MusicPlayerUiEvents.PlaySong(state.songs!!.data[index].url))
+                                viewModel.onEvent(event = MusicPlayerUiEvents.PlayingSongIndex(index))
 
 
                             }
@@ -111,7 +140,13 @@ fun ForYouScreenContent(
                         modifier = Modifier,
                         //contentAlignment = Alignment.BottomCenter
                     ) {
-                        SongPlayPauseCard(song = song, state) {
+                        SongPlayPauseCard(
+                            song = song,
+                            state = state,
+                            index = state.playingSongIndex.value,
+                            openSongScreen = { openSongScreen, index ->
+                                openSongSheet = openSongScreen
+                            }) {
                             if (it) {
                                 viewModel.onEvent(event = MusicPlayerUiEvents.IsSongPlaying(false))
                                 viewModel.onEvent(event = MusicPlayerUiEvents.PauseSong(true))
@@ -125,19 +160,99 @@ fun ForYouScreenContent(
 
             }
         }
+
+        if (openSongSheet) {
+
+            ModalBottomSheet(
+                onDismissRequest = {
+                    openSongSheet = false
+                },
+                Modifier.fillMaxHeight(),
+//                    .windowInsetsPadding(WindowInsets.statusBars),
+                //.statusBarsPadding(),
+                containerColor = Color.White,
+                sheetState = playingSongSheetState,
+                shape = BottomSheetDefaults.HiddenShape,
+                scrimColor = Color.Black,
+//                dragHandle = {},
+                windowInsets = WindowInsets.statusBars.
+            ) {
+                PlayingSongSheet(songIndex = state.playingSongIndex.value, state) {
+                    scope.launch { playingSongSheetState.hide() }
+                        .invokeOnCompletion {
+                            if (!playingSongSheetState.isVisible) {
+                                openSongSheet = false
+                            }
+                        }
+
+                }
+            }
+        }
     }
 }
 
+//suspend fun getDominantColors(imageUrl: String): List<Color> {
+//    val result = await(coilImage(imageUrl)) // Use await for suspending function
+//    val bitmap = result.value ?: return emptyList() // Handle null result
+//    val palette = Palette.from(bitmap).dominantSwatch ?: return emptyList()
+//    return listOf(palette.rgb, palette.bodyTextColor) // Extract dominant colors
+//}
 @Composable
-fun SongPlayPauseCard(song: Song, state: MusicPlayerStates, pauseSong: (pausedSong: Boolean) -> Unit,) {
-//    var state by remember {
-//        mutableStateOf(true)
+fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () -> Unit) {
+    val context = LocalContext.current
+    var gradientColors by remember {
+        mutableStateOf<List<Color>>(emptyList())
+    }
+
+//    val painter = rememberAsyncImagePainter(
+//        model = ImageRequest.Builder(context)
+//            .data(state.songs!!.data[songIndex].url)
+//            .allowHardware(false)
+//            .size(coil.size.Size.ORIGINAL)
+//            .build()
+//    )
+//    Log.d("check", "cross image call")
+//    val baseImageloadState = painter.state
+//    if (baseImageloadState is AsyncImagePainter.State.Success){
+//        val baseImageBitmap =
+//            baseImageloadState.result.drawable.toBitmap()
+//        val colors = listOf(
+//            Palette.from(baseImageBitmap).generate().darkVibrantSwatch?.let { Color(it.titleTextColor) }
+//                ?: Color.Gray,
+//            Palette.from(baseImageBitmap).generate().dominantSwatch?.let { Color(it.bodyTextColor) }
+//                ?: Color.Gray,
+//            Palette.from(baseImageBitmap).generate().lightMutedSwatch?.let { Color(it.titleTextColor) }
+//                ?: Color.Gray,
+//            Palette.from(baseImageBitmap).generate().darkMutedSwatch?.let { Color(it.titleTextColor) }
+//                ?: Color.Gray
+//        )
+//        gradientColors = colors
 //    }
-//    if (state.isSongPlaying.value) {
-//        pauseSong(false)
-//    } else {
-//        pauseSong(true)
-//    }
+
+    Log.d("check", "cross image call 3333")
+    val sheetBackground = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF436c89),
+            Color(0xFF8b2c40)
+        )
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(sheetBackground)
+    )
+}
+
+@Composable
+fun SongPlayPauseCard(
+    song: Song,
+    index: Int,
+    state: MusicPlayerStates,
+    openSongScreen: (openSongScreen: Boolean, index: Int) -> Unit,
+    pauseSong: (pausedSong: Boolean) -> Unit,
+) {
+
     val songImageRotation = rememberInfiniteTransition(label = "")
     val angle by songImageRotation.animateFloat(
         initialValue = 0F,
@@ -159,7 +274,7 @@ fun SongPlayPauseCard(song: Song, state: MusicPlayerStates, pauseSong: (pausedSo
             .padding(horizontal = 1.dp)
             .background(cardBackgroundColor)
             .clickable {
-
+                openSongScreen(true, index)
             },
     ) {
         Box(
@@ -220,7 +335,6 @@ fun SongPlayPauseCard(song: Song, state: MusicPlayerStates, pauseSong: (pausedSo
                         )
                     }
                 }
-
 
 
                 /// Song Details -----------------

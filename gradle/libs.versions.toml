@@ -27,6 +27,9 @@ hiltNavigationCompose = "1.2.0"
 
 materialIconsExtendedAndroid = "1.6.5"
 
+palette = "1.0.0"
+
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -62,6 +65,8 @@ hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", ve
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 
 androidx-material-icons-extended-android = { module = "androidx.compose.material:material-icons-extended-android", version.ref = "materialIconsExtendedAndroid" }
+
+androidx-palette = { module = "androidx.palette:palette", version.ref = "palette" }
 
 
 [plugins]

@@ -98,8 +98,7 @@ dependencies {
 
     //Material extended icon
     implementation(libs.androidx.material.icons.extended.android)
-
-
+    implementation(libs.androidx.palette)
 
 
 }

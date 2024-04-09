@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -54,7 +55,7 @@ class MainActivity : ComponentActivity() {
     private val songViewModel by viewModels<SongViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+//        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
 
             val lifecyclleOwner = LocalLifecycleOwner.current.lifecycle
