@@ -6,6 +6,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -56,6 +57,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -298,9 +301,14 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
             .background(sheetBackground)
             .fillMaxSize()
     ) {
+
+        //Image Pager -------------------
         Box(
-            modifier = Modifier.fillMaxWidth().padding(top = 50.dp), contentAlignment = Alignment.Center
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 50.dp), contentAlignment = Alignment.Center
         ) {
+
             HorizontalPager(
                 modifier = Modifier,
                 contentPadding = PaddingValues(horizontal = 60.dp),
@@ -309,7 +317,7 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
                 //pageSpacing = 10.dp,
                 verticalAlignment = Alignment.Bottom,
 
-            ) { page ->
+                ) { page ->
                 SubcomposeAsyncImage(
                     alignment = Alignment.Center,
                     modifier = Modifier
@@ -346,6 +354,89 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
                 )
             }
         }
+
+
+        // Song name and Author
+        Column(
+            modifier = Modifier.padding(top = 60.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = state.songs!!.data[pagerState.currentPage].name,
+                fontFamily = poppins,
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Text(
+                text = state.songs.data[pagerState.currentPage].artist,
+                fontFamily = ubuntu,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.LightGray
+            )
+        }
+
+        Box(
+            modifier =
+            Modifier
+                .padding(vertical = 80.dp, horizontal = 20.dp)
+                .fillMaxWidth()
+                .height(20.dp)
+                .background(Color.White)
+        )
+
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                modifier = Modifier.scale(1.5f),
+                onClick = {
+
+            }) {
+                Icon(
+                    painter = painterResource(R.drawable.nex),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .height(30.dp),
+                    tint = Color(0xA6C0C4C7),
+                )
+            }
+
+            IconButton(
+                modifier = Modifier.scale(1.4f),
+                onClick = {
+
+            }) {
+                Icon(
+                    painter = painterResource(R.drawable.play),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(60.dp),
+                    tint = Color.Unspecified
+                )
+            }
+
+
+            IconButton(
+                modifier = Modifier.scale(1.5f),
+                onClick = {}
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.nex),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(30.dp).rotate(180f),
+                    tint = Color(0xA6C0C4C7),
+
+                    )
+            }
+        }
+
     }
 }
 
