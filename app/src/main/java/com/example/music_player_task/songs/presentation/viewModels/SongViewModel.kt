@@ -52,14 +52,6 @@ class SongViewModel @Inject constructor(
     }
 
     private var mediaPlayer: MediaPlayer? = null
-    private var currentPosition = 0
-
-    init {
-        mediaPlayer?.let { mediaPlayer ->
-            updatePlaybackState(mediaPlayer.currentPosition)
-        }
-
-    }
 
     fun onEvent(event: MusicPlayerUiEvents) {
         when (event) {
@@ -67,7 +59,6 @@ class SongViewModel @Inject constructor(
             is MusicPlayerUiEvents.PlaySong -> {
                 mediaPlayer?.let {
                     if (it.isPlaying) {
-                        Log.d("check for song duration", "song stop")
                         mediaPlayer?.stop()
                         mediaPlayer?.reset()
                         _musicPlayerState.update { state ->
@@ -98,7 +89,9 @@ class SongViewModel @Inject constructor(
                     mediaPlayer.seekTo(state.value.playingSongCurrentPosition.value)
                     mediaPlayer.start()
                     setSongDuration(mediaPlayer.duration)
-                    Log.d("check for song duration", "${state.value.playingSongDuration.value}")
+                    updatePlaybackState(mediaPlayer.currentPosition)
+
+                    Log.d("check for currentD_VM", "${state.value.playingSongCurrentPosition.value}")
                 }
 
                 mediaPlayer?.setOnCompletionListener { mediaPlayer ->
@@ -125,7 +118,6 @@ class SongViewModel @Inject constructor(
             is MusicPlayerUiEvents.PauseSong -> {
 
                 mediaPlayer?.let {
-                    Log.d("check for current position", "${state.value.playingSongCurrentPosition}")
                     _musicPlayerState.update { state ->
                         state.copy(
                             playingSongCurrentPosition = state.playingSongCurrentPosition.apply {
@@ -133,7 +125,7 @@ class SongViewModel @Inject constructor(
                             }
                         )
                     }
-                    Log.d("check for current position after", "${state.value.playingSongCurrentPosition}")
+
                     if (event.isPause) {
                         it.pause()
                     } else {
@@ -274,6 +266,9 @@ class SongViewModel @Inject constructor(
 //                }
 //
 //            }
+            is MusicPlayerUiEvents.UpdatePlaybackState -> {
+                updatePlaybackState(event.currentPosition)
+            }
         }
 
     }

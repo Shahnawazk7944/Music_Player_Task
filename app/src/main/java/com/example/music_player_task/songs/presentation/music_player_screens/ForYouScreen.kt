@@ -1,11 +1,18 @@
 package com.example.music_player_task.songs.presentation.music_player_screens
 
 import android.util.Log
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -128,15 +135,23 @@ fun ForYouScreenContent(
             // state at fixed sized
         )
         val scope = rememberCoroutineScope()
-        val scope2 = rememberCoroutineScope()
         var openSongSheet by remember { mutableStateOf(false) }
-
-        LaunchedEffect(key1 = state.playingSongCurrentPosition) {
+//        viewModel.mediaPlayer?.let {
+//
+//            LaunchedEffect(viewModel.mediaPlayer!!.currentPosition) {
+//                //Log.d("check-----", "${it.currentPosition}")
+//                viewModel.onEvent(MusicPlayerUiEvents.UpdatePlaybackState(it.currentPosition))
+//                viewModel.state.collectLatest {
+//                    Log.d("check for song -------", "${it.playingSongCurrentPosition.value}")
+//                }
+//            }
+//        }
+        LaunchedEffect(state.playingSongCurrentPosition) {
+            //Log.d("check-----", "${it.currentPosition}")
             viewModel.state.collectLatest {
-                Log.d("check for song playing position", "${it.playingSongCurrentPosition.value}")
+                Log.d("check for song -------", "${it.playingSongCurrentPosition.value}")
             }
         }
-
 
         if (state.isLoading) {
             LoadingDialog(true)
@@ -261,7 +276,7 @@ fun ForYouScreenContent(
 //    val palette = Palette.from(bitmap).dominantSwatch ?: return emptyList()
 //    return listOf(palette.rgb, palette.bodyTextColor) // Extract dominant colors
 //}
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () -> Unit) {
     val context = LocalContext.current
@@ -379,29 +394,32 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
             }
         }
 
+        AnimatedContent(targetState = pagerState.currentPage, transitionSpec = {
+            (scaleIn() + fadeIn()) with (scaleOut() + fadeOut())
+        }, label = "") {
 
-        // Song name and Author
-        Column(
-            modifier = Modifier.padding(top = 60.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = state.songs!!.data[pagerState.currentPage].name,
-                fontFamily = poppins,
-                fontSize = 25.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-            Text(
-                text = state.songs.data[pagerState.currentPage].artist,
-                fontFamily = ubuntu,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.LightGray
-            )
+            // Song name and Author
+            Column(
+                modifier = Modifier.padding(top = 60.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = state.songs!!.data[it].name,
+                    fontFamily = poppins,
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    text = state.songs.data[it].artist,
+                    fontFamily = ubuntu,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color.LightGray
+                )
+            }
         }
-
         Box(
             modifier =
             Modifier
@@ -411,8 +429,9 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
         ) {
             var fraction by remember { mutableFloatStateOf(1f) }
             WavySlider(
-                value = fraction,
-                onValueChange = { fraction = it },
+                valueRange = 1000f..state.playingSongDuration.value.toFloat(),
+                value = 1000f,
+                onValueChange = { },
                 waveLength = 25.dp,     // Set this to 0.dp to get a regular Slider
                 waveHeight = 10.dp,     // Set this to 0.dp to get a regular Slider
                 waveVelocity = 15.dp to WaveDirection.HEAD, // Speed per second and its direction
