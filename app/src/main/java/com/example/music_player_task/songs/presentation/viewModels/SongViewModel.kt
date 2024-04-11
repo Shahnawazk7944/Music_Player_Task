@@ -101,21 +101,20 @@ class SongViewModel @Inject constructor(
                     Log.d("check for song duration", "${state.value.playingSongDuration.value}")
                 }
 
-                mediaPlayer?.setOnSeekCompleteListener { mediaPlayer ->
+                mediaPlayer?.setOnCompletionListener { mediaPlayer ->
                     // Use for precise updates
                     mediaPlayer?.stop()
-                    mediaPlayer?.reset()
-                    _musicPlayerState.update {state ->
+                    _musicPlayerState.update { state ->
                         state.copy(
                             playingSongCurrentPosition = state.playingSongCurrentPosition.apply {
+                                this.value = 0
+                            },
+                            playingSongDuration = state.playingSongDuration.apply {
                                 this.value = 0
                             },
                             isSongPlaying = state.isSongPlaying.apply {
                                 this.value = false
                             },
-                            selectTheSong = state.selectTheSong.apply {
-                                this.value = null
-                            }
                         )
                     }
                 }
