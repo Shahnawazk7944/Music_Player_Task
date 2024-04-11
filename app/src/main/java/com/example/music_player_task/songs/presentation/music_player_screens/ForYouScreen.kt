@@ -1,12 +1,12 @@
 package com.example.music_player_task.songs.presentation.music_player_screens
 
+import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -48,8 +48,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -70,6 +72,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.music_player_task.R
@@ -82,6 +85,9 @@ import com.example.music_player_task.songs.util.Constant.BASE_URL
 import com.example.music_player_task.ui.poppins
 import com.example.music_player_task.ui.ubuntu
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import ir.mahozad.multiplatform.wavyslider.WaveDirection
+import ir.mahozad.multiplatform.wavyslider.material3.WavySlider
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
@@ -123,7 +129,16 @@ fun ForYouScreenContent(
             // state at fixed sized
         )
         val scope = rememberCoroutineScope()
+        val scope2 = rememberCoroutineScope()
         var openSongSheet by remember { mutableStateOf(false) }
+
+        LaunchedEffect(key1 = state.playingSongCurrentPosition) {
+            viewModel.state.collectLatest {
+                Log.d("check for song playing position", "${it.playingSongCurrentPosition.value}")
+            }
+        }
+
+
         if (state.isLoading) {
             LoadingDialog(true)
         } else {
@@ -247,6 +262,7 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
     }
     val systemUiController = rememberSystemUiController()
     val useDarkIcons = isSystemInDarkTheme()
+
 
     SideEffect {
         // Update all of the system bar colors to be transparent, and use
@@ -384,8 +400,20 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
                 .padding(vertical = 80.dp, horizontal = 20.dp)
                 .fillMaxWidth()
                 .height(20.dp)
-                .background(Color.White)
-        )
+        ){
+            var fraction by remember { mutableFloatStateOf(1f) }
+            WavySlider(
+                value = fraction,
+                onValueChange = { fraction = it },
+                waveLength = 25.dp,     // Set this to 0.dp to get a regular Slider
+                waveHeight = 10.dp,     // Set this to 0.dp to get a regular Slider
+                waveVelocity = 15.dp to WaveDirection.HEAD, // Speed per second and its direction
+                waveThickness = 4.dp,   // Defaults to the specified trackThickness
+                trackThickness = 4.dp,  // Defaults to 4.dp, same as regular Slider
+                incremental = false,    // Whether to gradually increase waveHeight
+                // animationSpecs = ... // Customize various animations of the wave
+            )
+        }
 
 
         Row(
@@ -397,7 +425,7 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
                 modifier = Modifier.scale(1.5f),
                 onClick = {
 
-            }) {
+                }) {
                 Icon(
                     painter = painterResource(R.drawable.nex),
                     contentDescription = null,
@@ -406,20 +434,36 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
                     tint = Color(0xA6C0C4C7),
                 )
             }
+            if (false) {
+                IconButton(
+                    modifier = Modifier.scale(1.4f),
+                    onClick = {
 
-            IconButton(
-                modifier = Modifier.scale(1.4f),
-                onClick = {
+                    }) {
+                    Icon(
+                        painter = painterResource(R.drawable.play),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(60.dp),
+                        tint = Color.Unspecified
+                    )
+                }
+            } else {
+                IconButton(
+                    modifier = Modifier.scale(1.4f),
+                    onClick = {
 
-            }) {
-                Icon(
-                    painter = painterResource(R.drawable.play),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(60.dp),
-                    tint = Color.Unspecified
-                )
+                    }) {
+                    Icon(
+                        painter = painterResource(R.drawable.pause),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(60.dp),
+                        tint = Color.Unspecified
+                    )
+                }
             }
+
 
 
             IconButton(
@@ -430,7 +474,8 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
                     painter = painterResource(R.drawable.nex),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(30.dp).rotate(180f),
+                        .size(30.dp)
+                        .rotate(180f),
                     tint = Color(0xA6C0C4C7),
 
                     )
