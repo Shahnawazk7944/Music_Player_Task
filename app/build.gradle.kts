@@ -102,5 +102,7 @@ dependencies {
     implementation(libs.androidx.palette)
     implementation(libs.accompanist.systemuicontroller)
 
+    //Wavy Slider
+    implementation(libs.wavy.slider)
 
 }

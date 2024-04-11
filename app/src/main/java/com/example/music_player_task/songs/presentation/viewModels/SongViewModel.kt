@@ -1,18 +1,9 @@
 package com.example.music_player_task.songs.presentation.viewModels
 
-import android.graphics.drawable.BitmapDrawable
-import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.util.Log
-import androidx.compose.ui.graphics.Color
-import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.palette.graphics.Palette
-import coil.ImageLoader
-import coil.imageLoader
-import coil.request.ImageRequest
-import coil.request.SuccessResult
 import com.example.music_player_task.songs.domain.repository.SongImageRepository
 import com.example.music_player_task.songs.domain.repository.SongRepository
 import com.example.music_player_task.songs.util.Event
@@ -61,20 +52,36 @@ class SongViewModel @Inject constructor(
     }
 
     private var mediaPlayer: MediaPlayer? = null
-    val mediaMetadataRetriever = MediaMetadataRetriever()
     private var currentPosition = 0
+
+    init {
+        mediaPlayer?.let { mediaPlayer ->
+            updatePlaybackState(mediaPlayer.currentPosition)
+        }
+
+    }
+
     fun onEvent(event: MusicPlayerUiEvents) {
         when (event) {
 
             is MusicPlayerUiEvents.PlaySong -> {
-                    mediaPlayer?.let {
-                        if (it.isPlaying) {
-                            Log.d("check for song duration", "song stop")
-                            mediaPlayer?.stop()
-                            mediaPlayer?.reset()
-                            currentPosition = 0
+                mediaPlayer?.let {
+                    if (it.isPlaying) {
+                        Log.d("check for song duration", "song stop")
+                        mediaPlayer?.stop()
+                        mediaPlayer?.reset()
+                        _musicPlayerState.update { state ->
+                            state.copy(
+                                playingSongCurrentPosition = state.playingSongCurrentPosition.apply {
+                                    this.value = 0
+                                },
+                                playingSongDuration = state.playingSongDuration.apply {
+                                    this.value = 0
+                                }
+                            )
                         }
                     }
+                }
                 _musicPlayerState.update {
                     it.copy(
                         isSongPlaying = it.isSongPlaying.apply {
@@ -82,45 +89,90 @@ class SongViewModel @Inject constructor(
                         }
                     )
                 }
-                    mediaPlayer?.release()
-                    mediaPlayer = MediaPlayer().apply {
-                        setDataSource(event.url)
-                        prepareAsync()
+                mediaPlayer?.release()
+                mediaPlayer = MediaPlayer().apply {
+                    setDataSource(event.url)
+                    prepareAsync()
+                }
+                mediaPlayer?.setOnPreparedListener { mediaPlayer ->
+                    mediaPlayer.seekTo(state.value.playingSongCurrentPosition.value)
+                    mediaPlayer.start()
+                    setSongDuration(mediaPlayer.duration)
+                    Log.d("check for song duration", "${state.value.playingSongDuration.value}")
+                }
+
+                mediaPlayer?.setOnSeekCompleteListener { mediaPlayer ->
+                    // Use for precise updates
+                    mediaPlayer?.stop()
+                    mediaPlayer?.reset()
+                    _musicPlayerState.update {state ->
+                        state.copy(
+                            playingSongCurrentPosition = state.playingSongCurrentPosition.apply {
+                                this.value = 0
+                            },
+                            isSongPlaying = state.isSongPlaying.apply {
+                                this.value = false
+                            },
+                            selectTheSong = state.selectTheSong.apply {
+                                this.value = null
+                            }
+                        )
                     }
-                    mediaPlayer?.setOnPreparedListener { mediaPlayer ->
-                        mediaPlayer.seekTo(currentPosition)
-                        mediaPlayer.start()
-                        Log.d("check for song duration", "${mediaPlayer.duration}")
-                    }
+                }
+
             }
 
 
             is MusicPlayerUiEvents.PauseSong -> {
 
-                    mediaPlayer?.let {
-                        Log.d("check for current position", "$currentPosition")
-                        currentPosition = it.currentPosition
-                        Log.d("check for current position after", "$currentPosition")
-                        if (event.isPause) {
-                            it.pause()
-                        } else {
-                            it.seekTo(currentPosition)
-                            it.start()
-                        }
+                mediaPlayer?.let {
+                    Log.d("check for current position", "${state.value.playingSongCurrentPosition}")
+                    _musicPlayerState.update { state ->
+                        state.copy(
+                            playingSongCurrentPosition = state.playingSongCurrentPosition.apply {
+                                this.value = it.currentPosition
+                            }
+                        )
                     }
+                    Log.d("check for current position after", "${state.value.playingSongCurrentPosition}")
+                    if (event.isPause) {
+                        it.pause()
+                    } else {
+                        it.seekTo(state.value.playingSongCurrentPosition.value)
+                        it.start()
+                    }
+                }
             }
 
             is MusicPlayerUiEvents.StopSong -> {
-                    mediaPlayer?.stop()
-                    mediaPlayer?.reset()
-                    currentPosition = 0
+                mediaPlayer?.stop()
+                mediaPlayer?.reset()
+                _musicPlayerState.update { state ->
+                    state.copy(
+                        playingSongCurrentPosition = state.playingSongCurrentPosition.apply {
+                            this.value = 0
+                        },
+                        playingSongDuration = state.playingSongDuration.apply {
+                            this.value = 0
+                        }
+                    )
+                }
             }
 
             is MusicPlayerUiEvents.ReleasePlayer -> {
-                    mediaPlayer?.reset()
-                    mediaPlayer?.release()
-                    mediaPlayer = null
-                    currentPosition = 0
+                mediaPlayer?.reset()
+                mediaPlayer?.release()
+                mediaPlayer = null
+                _musicPlayerState.update { state ->
+                    state.copy(
+                        playingSongCurrentPosition = state.playingSongCurrentPosition.apply {
+                            this.value = 0
+                        },
+                        playingSongDuration = state.playingSongDuration.apply {
+                            this.value = 0
+                        }
+                    )
+                }
             }
 
             is MusicPlayerUiEvents.NavigateTo -> {
@@ -128,6 +180,7 @@ class SongViewModel @Inject constructor(
                     it.copy(route = event.route)
                 }
             }
+
             is MusicPlayerUiEvents.SelectTheSong -> {
                 _musicPlayerState.update {
                     it.copy(
@@ -137,6 +190,7 @@ class SongViewModel @Inject constructor(
                     )
                 }
             }
+
             is MusicPlayerUiEvents.IsSongPlaying -> {
                 _musicPlayerState.update {
                     it.copy(
@@ -156,6 +210,7 @@ class SongViewModel @Inject constructor(
                     )
                 }
             }
+
             is MusicPlayerUiEvents.GetColorsFromImage -> {
 //                viewModelScope.launch {
 //                    val loader = ImageLoader(event.context)
@@ -196,7 +251,6 @@ class SongViewModel @Inject constructor(
             }
 
 
-
 //            is MusicPlayerUiEvents.GetSongImage -> {
 //                viewModelScope.launch {
 //                    _musicPlayerState.update { it.copy(isSongImageLoading = true) }
@@ -223,6 +277,26 @@ class SongViewModel @Inject constructor(
 //            }
         }
 
+    }
+
+    private fun updatePlaybackState(currentPosition: Int) {
+        _musicPlayerState.update {
+            it.copy(
+                playingSongCurrentPosition = it.playingSongCurrentPosition.apply {
+                    this.value = currentPosition
+                }
+            )
+        }
+    }
+
+    private fun setSongDuration(duration: Int) {
+        _musicPlayerState.update {
+            it.copy(
+                playingSongDuration = it.playingSongDuration.apply {
+                    this.value = duration
+                }
+            )
+        }
     }
 
 }

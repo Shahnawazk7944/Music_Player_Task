@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import com.example.music_player_task.songs.domain.model.Song
 import com.example.music_player_task.songs.domain.model.Songs
+import java.time.Duration
 
 
 data class MusicPlayerStates(
@@ -19,6 +20,8 @@ data class MusicPlayerStates(
     var selectTheSong: MutableState<Song?> = mutableStateOf(null),
     var isSongPlaying: MutableState<Boolean> = mutableStateOf(true),
     var playingSongIndex: MutableState<Int> = mutableIntStateOf(0),
-    var gradientColors: List<androidx.compose.ui.graphics.Color> = emptyList()
+    var gradientColors: List<androidx.compose.ui.graphics.Color> = emptyList(),
+    var playingSongCurrentPosition: MutableState<Int> = mutableIntStateOf(0),
+    var playingSongDuration: MutableState<Int> = mutableIntStateOf(0),
 )
 
