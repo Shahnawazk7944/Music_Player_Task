@@ -72,7 +72,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.music_player_task.R
@@ -183,15 +182,24 @@ fun ForYouScreenContent(
                             index = state.playingSongIndex.value,
                             openSongScreen = { openSongScreen, index ->
                                 openSongSheet = openSongScreen
-                            }) {
-                            if (it) {
-                                viewModel.onEvent(event = MusicPlayerUiEvents.IsSongPlaying(false))
-                                viewModel.onEvent(event = MusicPlayerUiEvents.PauseSong(true))
-                            } else {
-                                viewModel.onEvent(event = MusicPlayerUiEvents.IsSongPlaying(true))
-                                viewModel.onEvent(event = MusicPlayerUiEvents.PauseSong(false))
+                            },
+                            pauseSong = {
+                                if (it) {
+                                    viewModel.onEvent(
+                                        event = MusicPlayerUiEvents.IsSongPlaying(
+                                            false
+                                        )
+                                    )
+                                    viewModel.onEvent(event = MusicPlayerUiEvents.PauseSong(true))
+                                } else {
+                                    viewModel.onEvent(event = MusicPlayerUiEvents.IsSongPlaying(true))
+                                    viewModel.onEvent(event = MusicPlayerUiEvents.PauseSong(false))
+                                }
+                            },
+                            playAgain = {
+                                viewModel.onEvent(event = MusicPlayerUiEvents.PlaySong(it))
                             }
-                        }
+                        )
                     }
                 }
 
@@ -400,7 +408,7 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
                 .padding(vertical = 80.dp, horizontal = 20.dp)
                 .fillMaxWidth()
                 .height(20.dp)
-        ){
+        ) {
             var fraction by remember { mutableFloatStateOf(1f) }
             WavySlider(
                 value = fraction,
@@ -492,6 +500,7 @@ fun SongPlayPauseCard(
     state: MusicPlayerStates,
     openSongScreen: (openSongScreen: Boolean, index: Int) -> Unit,
     pauseSong: (pausedSong: Boolean) -> Unit,
+    playAgain: (song: String) -> Unit,
 ) {
 
     val songImageRotation = rememberInfiniteTransition(label = "")
@@ -606,12 +615,12 @@ fun SongPlayPauseCard(
 
 
                 /// Song Play Pause --------------------
-                if (state.isSongPlaying.value) {
+                if (state.playingSongDuration.value == 0) {
                     IconButton(onClick = {
-                        pauseSong(true)
+                        playAgain(song.url)
                     }) {
                         Icon(
-                            painter = painterResource(R.drawable.pause),
+                            painter = painterResource(R.drawable.restart),
                             contentDescription = null,
                             modifier = Modifier
                                 .size(40.dp)
@@ -620,17 +629,32 @@ fun SongPlayPauseCard(
                         )
                     }
                 } else {
-                    IconButton(onClick = {
-                        pauseSong(false)
-                    }) {
-                        Icon(
-                            painter = painterResource(R.drawable.play),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(40.dp)
-                                .weight(4f),
-                            tint = Color.Unspecified
-                        )
+                    if (state.isSongPlaying.value) {
+                        IconButton(onClick = {
+                            pauseSong(true)
+                        }) {
+                            Icon(
+                                painter = painterResource(R.drawable.pause),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .weight(4f),
+                                tint = Color.Unspecified
+                            )
+                        }
+                    } else {
+                        IconButton(onClick = {
+                            pauseSong(false)
+                        }) {
+                            Icon(
+                                painter = painterResource(R.drawable.play),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .weight(4f),
+                                tint = Color.Unspecified
+                            )
+                        }
                     }
                 }
 
