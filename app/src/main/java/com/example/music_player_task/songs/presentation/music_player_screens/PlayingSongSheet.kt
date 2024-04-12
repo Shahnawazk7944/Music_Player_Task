@@ -1,5 +1,7 @@
 package com.example.music_player_task.songs.presentation.music_player_screens
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
@@ -9,6 +11,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,31 +58,38 @@ import androidx.compose.ui.util.lerp
 import coil.compose.SubcomposeAsyncImage
 import com.example.music_player_task.R
 import com.example.music_player_task.songs.presentation.viewModels.MusicPlayerStates
+import com.example.music_player_task.songs.presentation.viewModels.MusicPlayerUiEvents
+import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
 import com.example.music_player_task.songs.util.Constant
 import com.example.music_player_task.ui.poppins
 import com.example.music_player_task.ui.ubuntu
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import ir.mahozad.multiplatform.wavyslider.WaveDirection
 import ir.mahozad.multiplatform.wavyslider.material3.WavySlider
+import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 @Composable
-fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () -> Unit) {
+fun PlayingSongSheet(
+    songIndex: Int, viewModel: SongViewModel, state: MusicPlayerStates, closeSheet: () -> Unit
+) {
     val context = LocalContext.current
     var gradientColors by remember {
         mutableStateOf<List<Color>>(emptyList())
     }
+    val scope = rememberCoroutineScope()
     val systemUiController = rememberSystemUiController()
     val useDarkIcons = isSystemInDarkTheme()
+
 
 
     SideEffect {
         // Update all of the system bar colors to be transparent, and use
         // dark icons if we're in light theme
         systemUiController.setSystemBarsColor(
-            color = Color(0xFF436c89),
-            darkIcons = !useDarkIcons
+            color = Color(0xFF436c89), darkIcons = !useDarkIcons
         )
 
         // setStatusBarsColor() and setNavigationBarsColor() also exist
@@ -110,14 +121,15 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
 
     val sheetBackground = Brush.verticalGradient(
         colors = listOf(
-            Color(0xFF436c89),
-            Color(0xFF8b2c40)
+            Color(0xFF436c89), Color(0xFF8b2c40)
         )
     )
 
-    val pagerState = rememberPagerState(pageCount = {
-        state.songs!!.data.size
-    })
+    val pagerState = rememberPagerState(
+        pageCount = {
+            state.songs!!.data.size
+        }, initialPage = state.changeSongIndex.value
+    )
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -131,7 +143,8 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 50.dp), contentAlignment = Alignment.Center
+                .padding(top = 50.dp),
+            contentAlignment = Alignment.Center
         ) {
 
             HorizontalPager(
@@ -142,7 +155,17 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
                 //pageSpacing = 10.dp,
                 verticalAlignment = Alignment.Bottom,
 
+
                 ) { page ->
+
+                val isDragged = pagerState.interactionSource.collectIsDraggedAsState()
+                if (isDragged.value) {
+
+                    viewModel.onEvent(event = MusicPlayerUiEvents.PlaySong(state.songs!!.data[page].url))
+                    viewModel.onEvent(event = MusicPlayerUiEvents.SelectTheSong(state.songs!!.data[page]))
+                    viewModel.onEvent(event = MusicPlayerUiEvents.changeSongIndex(page))
+                }
+
                 SubcomposeAsyncImage(
                     alignment = Alignment.Center,
                     modifier = Modifier
@@ -150,14 +173,10 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
                         .padding(horizontal = 20.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .graphicsLayer {
-                            val pageOffSet = (
-                                    (pagerState.currentPage - page) + pagerState
-                                        .currentPageOffsetFraction
-                                    ).absoluteValue
+                            val pageOffSet =
+                                ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction).absoluteValue
                             alpha = lerp(
-                                start = 0.5f,
-                                stop = 1f,
-                                fraction = 1f - pageOffSet.coerceIn(0f, 1f)
+                                start = 0.5f, stop = 1f, fraction = 1f - pageOffSet.coerceIn(0f, 1f)
                             )
                             scaleY = lerp(
                                 start = 0.75f,
@@ -207,17 +226,16 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
             }
         }
         Box(
-            modifier =
-            Modifier
+            modifier = Modifier
                 .padding(vertical = 80.dp, horizontal = 20.dp)
                 .fillMaxWidth()
                 .height(20.dp)
         ) {
             var fraction by remember { mutableFloatStateOf(1f) }
             WavySlider(
-                valueRange = 1000f..state.playingSongDuration.value.toFloat(),
-                value = 1000f,
-                onValueChange = { },
+                valueRange = 0f..state.playingSongDuration.value.toFloat(),
+                value = state.playingSongCurrentPosition.value.toFloat(),
+                onValueChange = {},
                 waveLength = 25.dp,     // Set this to 0.dp to get a regular Slider
                 waveHeight = 10.dp,     // Set this to 0.dp to get a regular Slider
                 waveVelocity = 15.dp to WaveDirection.HEAD, // Speed per second and its direction
@@ -228,61 +246,108 @@ fun PlayingSongSheet(songIndex: Int, state: MusicPlayerStates, closeSheet: () ->
             )
         }
 
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                modifier = Modifier.scale(1.5f),
-                onClick = {
 
-                }) {
+            //PREVIOUS Button ---------------------
+            IconButton(modifier = Modifier.scale(1.5f), onClick = {
+                if (pagerState.currentPage > 0) {
+                    viewModel.onEvent(event = MusicPlayerUiEvents.PlaySong(state.songs!!.data[pagerState.currentPage - 1].url))
+                    viewModel.onEvent(event = MusicPlayerUiEvents.SelectTheSong(state.songs!!.data[pagerState.currentPage - 1]))
+                    viewModel.onEvent(event = MusicPlayerUiEvents.changeSongIndex(pagerState.currentPage - 1))
+                    scope.launch {
+                        pagerState.scrollToPage(pagerState.currentPage - 1)
+                    }
+                }
+            }) {
                 Icon(
                     painter = painterResource(R.drawable.nex),
                     contentDescription = null,
-                    modifier = Modifier
-                        .height(30.dp),
+                    modifier = Modifier.height(30.dp),
                     tint = Color(0xA6C0C4C7),
                 )
             }
-            if (false) {
-                IconButton(
-                    modifier = Modifier.scale(1.4f),
-                    onClick = {
 
-                    }) {
+
+            //Play Pause Button -----------------
+            if (state.playingSongDuration.value == 0) {
+                IconButton(modifier = Modifier.scale(1.5f), onClick = {
+                    viewModel.onEvent(
+                        event = MusicPlayerUiEvents.PlaySong(
+                            state.songs!!.data[state.changeSongIndex.value].url
+                        )
+                    )
+                }) {
                     Icon(
-                        painter = painterResource(R.drawable.play),
+                        painter = painterResource(R.drawable.restart),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(60.dp),
+                            .size(40.dp)
+                            .weight(4f),
                         tint = Color.Unspecified
                     )
                 }
             } else {
-                IconButton(
-                    modifier = Modifier.scale(1.4f),
-                    onClick = {
-
+                if (state.isSongPlaying.value) {
+                    IconButton(modifier = Modifier.scale(1.5f), onClick = {
+                        viewModel.onEvent(
+                            event = MusicPlayerUiEvents.IsSongPlaying(
+                                false
+                            )
+                        )
+                        viewModel.onEvent(event = MusicPlayerUiEvents.PauseSong(true))
                     }) {
-                    Icon(
-                        painter = painterResource(R.drawable.pause),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(60.dp),
-                        tint = Color.Unspecified
-                    )
+                        Icon(
+                            painter = painterResource(R.drawable.pause),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .weight(4f),
+                            tint = Color.Unspecified
+                        )
+                    }
+                } else {
+                    IconButton(modifier = Modifier.scale(1.5f), onClick = {
+                        viewModel.onEvent(
+                            event = MusicPlayerUiEvents.IsSongPlaying(
+                                true
+                            )
+                        )
+                        viewModel.onEvent(event = MusicPlayerUiEvents.PauseSong(false))
+                    }) {
+                        Icon(
+                            painter = painterResource(R.drawable.play),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .weight(4f),
+                            tint = Color.Unspecified
+                        )
+                    }
                 }
             }
 
 
 
-            IconButton(
-                modifier = Modifier.scale(1.5f),
-                onClick = {}
-            ) {
+
+            Log.d(
+                "check index",
+                "current ${pagerState.currentPage} total page ${state.songs!!.data.size}"
+            )
+            //NEXT Button ------------------
+            IconButton(modifier = Modifier.scale(1.5f), onClick = {
+                if (pagerState.currentPage + 1 < state.songs!!.data.size) {
+                    viewModel.onEvent(event = MusicPlayerUiEvents.PlaySong(state.songs!!.data[pagerState.currentPage + 1].url))
+                    viewModel.onEvent(event = MusicPlayerUiEvents.SelectTheSong(state.songs!!.data[pagerState.currentPage + 1]))
+                    viewModel.onEvent(event = MusicPlayerUiEvents.changeSongIndex(pagerState.currentPage + 1))
+                    scope.launch {
+                        pagerState.scrollToPage(pagerState.currentPage + 1)
+                    }
+                }
+            }) {
                 Icon(
                     painter = painterResource(R.drawable.nex),
                     contentDescription = null,

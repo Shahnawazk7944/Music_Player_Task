@@ -178,7 +178,7 @@ fun ForYouScreenContent(
                                 // viewModel.onEvent(event = MusicPlayerUiEvents.GetColorsFromImage(imageUrl = state.songs!!.data[index].url,context))
                                 viewModel.onEvent(event = MusicPlayerUiEvents.SelectTheSong(state.songs!!.data[index]))
                                 viewModel.onEvent(event = MusicPlayerUiEvents.PlaySong(state.songs!!.data[index].url))
-                                viewModel.onEvent(event = MusicPlayerUiEvents.PlayingSongIndex(index))
+                                viewModel.onEvent(event = MusicPlayerUiEvents.changeSongIndex(index))
 
 
                             }
@@ -255,7 +255,7 @@ fun ForYouScreenContent(
 //               windowInsets =
             ) {
 
-                PlayingSongSheet(songIndex = state.playingSongIndex.value, state) {
+                PlayingSongSheet(songIndex = state.playingSongIndex.value,viewModel, state, ) {
                     scope.launch { playingSongSheetState.hide() }
                         .invokeOnCompletion {
                             if (!playingSongSheetState.isVisible) {

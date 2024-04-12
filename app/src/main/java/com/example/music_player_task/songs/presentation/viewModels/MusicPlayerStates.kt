@@ -23,5 +23,6 @@ data class MusicPlayerStates(
     var gradientColors: List<androidx.compose.ui.graphics.Color> = emptyList(),
     var playingSongCurrentPosition: MutableState<Int> = mutableIntStateOf(0),
     var playingSongDuration: MutableState<Int> = mutableIntStateOf(0),
+    var changeSongIndex: MutableState<Int> = mutableIntStateOf(0),
 )
 
