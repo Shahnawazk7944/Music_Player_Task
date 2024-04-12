@@ -73,10 +73,16 @@ class SongViewModel @Inject constructor(
                         }
                     }
                 }
-                _musicPlayerState.update {
-                    it.copy(
-                        isSongPlaying = it.isSongPlaying.apply {
+                _musicPlayerState.update {state ->
+                    state.copy(
+                        isSongPlaying = state.isSongPlaying.apply {
                             this.value = true
+                        },
+                        playingSongCurrentPosition = state.playingSongCurrentPosition.apply {
+                            this.value = 0
+                        },
+                        playingSongDuration = state.playingSongDuration.apply {
+                            this.value = 0
                         }
                     )
                 }
@@ -268,6 +274,16 @@ class SongViewModel @Inject constructor(
 //            }
             is MusicPlayerUiEvents.UpdatePlaybackState -> {
                 updatePlaybackState(event.currentPosition)
+            }
+
+            is MusicPlayerUiEvents.changeSongIndex -> {
+                _musicPlayerState.update {
+                    it.copy(
+                        changeSongIndex = it.changeSongIndex.apply {
+                            this.value = event.index
+                        }
+                    )
+                }
             }
         }
 

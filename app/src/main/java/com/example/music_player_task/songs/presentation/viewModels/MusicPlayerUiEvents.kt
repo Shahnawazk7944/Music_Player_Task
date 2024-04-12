@@ -16,4 +16,5 @@ sealed class MusicPlayerUiEvents {
     data class PlayingSongIndex(val playingSongIndex:Int) : MusicPlayerUiEvents()
     data class GetColorsFromImage(val imageUrl:String, val context:Context) : MusicPlayerUiEvents()
     data class UpdatePlaybackState(val currentPosition:Int) : MusicPlayerUiEvents()
+    data class changeSongIndex(val index:Int) : MusicPlayerUiEvents()
 }

@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -167,41 +168,47 @@ fun SongPlayPauseCard(
 
                 /// Song Play Pause --------------------
                 if (state.playingSongDuration.value == 0) {
-                    IconButton(onClick = {
+                    IconButton(
+                        modifier = Modifier.scale(1.5f),
+                        onClick = {
                         playAgain(song.url)
                     }) {
                         Icon(
                             painter = painterResource(R.drawable.restart),
                             contentDescription = null,
                             modifier = Modifier
-                                .size(40.dp)
+                                .size(25.dp)
                                 .weight(4f),
                             tint = Color.Unspecified
                         )
                     }
                 } else {
                     if (state.isSongPlaying.value) {
-                        IconButton(onClick = {
+                        IconButton(
+                            modifier = Modifier.scale(1.5f),
+                            onClick = {
                             pauseSong(true)
                         }) {
                             Icon(
                                 painter = painterResource(R.drawable.pause),
                                 contentDescription = null,
                                 modifier = Modifier
-                                    .size(40.dp)
+                                    .size(25.dp)
                                     .weight(4f),
                                 tint = Color.Unspecified
                             )
                         }
                     } else {
-                        IconButton(onClick = {
+                        IconButton(
+                            modifier = Modifier.scale(1.5f),
+                            onClick = {
                             pauseSong(false)
                         }) {
                             Icon(
                                 painter = painterResource(R.drawable.play),
                                 contentDescription = null,
                                 modifier = Modifier
-                                    .size(40.dp)
+                                    .size(25.dp)
                                     .weight(4f),
                                 tint = Color.Unspecified
                             )
