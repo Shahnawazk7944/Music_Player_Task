@@ -63,7 +63,7 @@ The app utilizes Jetpack Compose, a modern UI framework for Android, to create a
 <p align="center">
 <img src="https://github.com/Shahnawazk7944/Music_Player_Task/assets/74444644/7033791f-2827-4018-870c-243d05492d8e" width="220" height="400" >&nbsp;&nbsp;
  <img src="https://github.com/Shahnawazk7944/Music_Player_Task/assets/74444644/9d803fd7-524f-4bbc-a2ac-6156f7be8658" width="220" height="400" >&nbsp;&nbsp;
-  <img src="https://github.com/Shahnawazk7944/Music_Player_Task/assets/74444644/1edc11a6-9dbd-46b6-830f-877e2583fad1" width="220" height="400" >
+  <img src="https://github.com/Shahnawazk7944/Music_Player_Task/assets/74444644/054296e3-0cda-4e1b-bdd6-ee434e7b09bb" width="220" height="400" >
 </p>
 
 
