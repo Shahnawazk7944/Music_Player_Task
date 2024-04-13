@@ -41,17 +41,30 @@ The app utilizes Jetpack Compose, a modern UI framework for Android, to create a
 
 - Users can browse and search for music through the API.
 - Users can play, pause, skip, and rewind songs.
-- Display song information like title, artist, and album art.
+- Display song information like title
+
+
+
+, artist, and album art.
 - Potentially integrate features like playlists, queue management, and playback settings. (Depending on app complexity)
 
 
 ### Screenshots/Visuals:
 
-<div align="center"><video src="" height="400" ></video></div>
-
+<br><br>
+<div align="center"><video src="https://github.com/Shahnawazk7944/Music_Player_Task/assets/74444644/d2df08b1-1e82-4bb3-917c-c8c044e29695" height="400" ></video></div>
+<br><br>
 <p align="center">
-<img src="" width="220" height="400" >&nbsp;&nbsp;
- <img src="" width="220" height="400" >&nbsp;&nbsp;
-  <img src="" width="220" height="400" >
+<img src="https://github.com/Shahnawazk7944/Music_Player_Task/assets/74444644/54e500f9-cd0a-491d-b226-f78644f219fa" width="220" height="400" >&nbsp;&nbsp;
+ <img src="https://github.com/Shahnawazk7944/Music_Player_Task/assets/74444644/511253b9-2a33-45be-baa3-3fdcee749f51" width="220" height="400" >&nbsp;&nbsp;
+  <img src="https://github.com/Shahnawazk7944/Music_Player_Task/assets/74444644/b3bf00a4-5858-4081-97e9-e23f2a088afb" width="220" height="400" >
 </p>
+<br><br>
+<p align="center">
+<img src="https://github.com/Shahnawazk7944/Music_Player_Task/assets/74444644/7033791f-2827-4018-870c-243d05492d8e" width="220" height="400" >&nbsp;&nbsp;
+ <img src="https://github.com/Shahnawazk7944/Music_Player_Task/assets/74444644/9d803fd7-524f-4bbc-a2ac-6156f7be8658" width="220" height="400" >&nbsp;&nbsp;
+  <img src="https://github.com/Shahnawazk7944/Music_Player_Task/assets/74444644/1edc11a6-9dbd-46b6-830f-877e2583fad1" width="220" height="400" >
+</p>
+
+
 
