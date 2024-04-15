@@ -7,6 +7,7 @@ import java.text.FieldPosition
 
 sealed class MusicPlayerUiEvents {
     data class NavigateTo(val route: String) : MusicPlayerUiEvents()
+    data class GetImageBitmap(val url: String) : MusicPlayerUiEvents()
     data class PlaySong(val url: String) : MusicPlayerUiEvents()
     data class PauseSong(val isPause: Boolean ) : MusicPlayerUiEvents()
     data class StopSong(val isStop :Boolean) : MusicPlayerUiEvents()
