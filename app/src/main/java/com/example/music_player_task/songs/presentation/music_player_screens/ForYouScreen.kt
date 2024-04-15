@@ -1,101 +1,48 @@
 package com.example.music_player_task.songs.presentation.music_player_screens
 
 import android.util.Log
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.with
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PageSize
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import coil.compose.SubcomposeAsyncImage
-import com.example.music_player_task.R
-import com.example.music_player_task.songs.domain.model.Song
 import com.example.music_player_task.songs.presentation.util.components.LoadingDialog
-import com.example.music_player_task.songs.presentation.viewModels.MusicPlayerStates
 import com.example.music_player_task.songs.presentation.viewModels.MusicPlayerUiEvents
 import com.example.music_player_task.songs.presentation.viewModels.SongViewModel
-import com.example.music_player_task.songs.util.Constant.BASE_URL
-import com.example.music_player_task.ui.poppins
-import com.example.music_player_task.ui.ubuntu
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import ir.mahozad.multiplatform.wavyslider.WaveDirection
-import ir.mahozad.multiplatform.wavyslider.material3.WavySlider
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlin.math.absoluteValue
 
 @Composable
 internal fun ForYouScreen(
@@ -106,7 +53,7 @@ internal fun ForYouScreen(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForYouScreenContent(
     navController: NavHostController, viewModel: SongViewModel
@@ -136,22 +83,6 @@ fun ForYouScreenContent(
         )
         val scope = rememberCoroutineScope()
         var openSongSheet by remember { mutableStateOf(false) }
-//        viewModel.mediaPlayer?.let {
-//
-//            LaunchedEffect(viewModel.mediaPlayer!!.currentPosition) {
-//                //Log.d("check-----", "${it.currentPosition}")
-//                viewModel.onEvent(MusicPlayerUiEvents.UpdatePlaybackState(it.currentPosition))
-//                viewModel.state.collectLatest {
-//                    Log.d("check for song -------", "${it.playingSongCurrentPosition.value}")
-//                }
-//            }
-//        }
-        LaunchedEffect(state.playingSongCurrentPosition) {
-            //Log.d("check-----", "${it.currentPosition}")
-            viewModel.state.collectLatest {
-                Log.d("check for song -------", "${it.playingSongCurrentPosition.value}")
-            }
-        }
 
         if (state.isLoading) {
             LoadingDialog(true)
@@ -170,12 +101,20 @@ fun ForYouScreenContent(
 
                         items(state.songs!!.data.size) { index ->
 
+                            // To Get Image Bitmap
+//                            LaunchedEffect(key1 = index) {
+//                                viewModel.onEvent(
+//                                    event = MusicPlayerUiEvents.GetColorsFromImage(
+//                                        state.songs!!.data[index].cover
+//                                    )
+//                                )
+//
+//                            }
                             SongCard(
                                 song = state.songs!!.data[index],
                                 index = index,
 
                                 ) { index, song ->
-                                // viewModel.onEvent(event = MusicPlayerUiEvents.GetColorsFromImage(imageUrl = state.songs!!.data[index].url,context))
                                 viewModel.onEvent(event = MusicPlayerUiEvents.SelectTheSong(state.songs!!.data[index]))
                                 viewModel.onEvent(event = MusicPlayerUiEvents.PlaySong(state.songs!!.data[index].url))
                                 viewModel.onEvent(event = MusicPlayerUiEvents.changeSongIndex(index))
@@ -255,7 +194,7 @@ fun ForYouScreenContent(
 //               windowInsets =
             ) {
 
-                PlayingSongSheet(songIndex = state.playingSongIndex.value,viewModel, state, ) {
+                PlayingSongSheet(songIndex = state.playingSongIndex.value, viewModel, state) {
                     scope.launch { playingSongSheetState.hide() }
                         .invokeOnCompletion {
                             if (!playingSongSheetState.isVisible) {
@@ -276,10 +215,6 @@ fun ForYouScreenContent(
 //    val palette = Palette.from(bitmap).dominantSwatch ?: return emptyList()
 //    return listOf(palette.rgb, palette.bodyTextColor) // Extract dominant colors
 //}
-
-
-
-
 
 
 //@Preview(showBackground = true)

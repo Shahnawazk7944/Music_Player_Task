@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.palette.graphics.Palette
 import coil.compose.SubcomposeAsyncImage
 import com.example.music_player_task.R
 import com.example.music_player_task.songs.domain.model.Song
@@ -63,12 +65,28 @@ fun SongPlayPauseCard(
             animation = tween(4000, easing = LinearEasing)
         ), label = ""
     )
+
+    //Get Colors from bitmap
+//        val palette = remember {
+//            Palette.from(state.getImageBitmap[index]).generate()
+//        }
+//
+//        val colors: List<Color> = listOf(
+//            palette.darkVibrantSwatch?.let { Color(it.titleTextColor) } ?: Color.Red,
+//            palette.dominantSwatch?.let { Color(it.bodyTextColor) } ?: Color.Blue,
+//            palette.lightMutedSwatch?.let { Color(it.titleTextColor) } ?: Color.Cyan,
+//            palette.darkMutedSwatch?.let { Color(it.titleTextColor) } ?: Color.White,
+//        )
+
+
     val cardBackgroundColor = Brush.horizontalGradient(
+//        colors = colors
         colors = listOf(
-            Color(0xFF436c89),
-            Color(0xFF8b2c40)
+            Color(0xFF436c89), Color(0xFF8b2c40)
         )
     )
+
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -171,8 +189,8 @@ fun SongPlayPauseCard(
                     IconButton(
                         modifier = Modifier.scale(1.5f),
                         onClick = {
-                        playAgain(song.url)
-                    }) {
+                            playAgain(song.url)
+                        }) {
                         Icon(
                             painter = painterResource(R.drawable.restart),
                             contentDescription = null,
@@ -187,8 +205,8 @@ fun SongPlayPauseCard(
                         IconButton(
                             modifier = Modifier.scale(1.5f),
                             onClick = {
-                            pauseSong(true)
-                        }) {
+                                pauseSong(true)
+                            }) {
                             Icon(
                                 painter = painterResource(R.drawable.pause),
                                 contentDescription = null,
@@ -202,8 +220,8 @@ fun SongPlayPauseCard(
                         IconButton(
                             modifier = Modifier.scale(1.5f),
                             onClick = {
-                            pauseSong(false)
-                        }) {
+                                pauseSong(false)
+                            }) {
                             Icon(
                                 painter = painterResource(R.drawable.play),
                                 contentDescription = null,

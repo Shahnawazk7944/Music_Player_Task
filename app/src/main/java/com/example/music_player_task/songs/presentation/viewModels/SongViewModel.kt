@@ -2,10 +2,8 @@ package com.example.music_player_task.songs.presentation.viewModels
 
 import android.media.MediaPlayer
 import android.util.Log
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.palette.graphics.Palette
 import com.example.music_player_task.songs.domain.repository.SongImageRepository
 import com.example.music_player_task.songs.domain.repository.SongRepository
 import com.example.music_player_task.songs.util.Event
@@ -46,7 +44,7 @@ class SongViewModel @Inject constructor(
                 }
                 sendEvent(event = Event.Toast(error.error.message))
             }
-            Log.d("check songs", state.value.songs!!.data[1].name)
+            // Log.d("check songs", state.value.songs!!.data[1].name)
             _musicPlayerState.update {
                 it.copy(isLoading = false)
             }
@@ -106,7 +104,6 @@ class SongViewModel @Inject constructor(
                 }
 
                 mediaPlayer?.setOnCompletionListener { mediaPlayer ->
-                    // Use for precise updates
                     mediaPlayer?.stop()
                     _musicPlayerState.update { state ->
                         state.copy(
@@ -213,69 +210,22 @@ class SongViewModel @Inject constructor(
                 }
             }
 
+
+
             is MusicPlayerUiEvents.GetColorsFromImage -> {
-                viewModelScope.launch {
-                    val loader = ImageLoader(event.context)
-                    val req = ImageRequest.Builder(event.context)
-                        .data(event.imageUrl) // demo link
-                        .target { result ->
-                            val bitmap = (result as BitmapDrawable).bitmap
-
-
-
-                            _musicPlayerState.update {
-                                it.copy(
-                                    gradientColors = colors
-                                )
-                            }
-                        }
-                        .build()
-                    val disposable = loader.enqueue(req)
-
-                    Log.d("check", "check 1")
-
-
-//                    val bitmap = (result as BitmapDrawable).bitmap
-
-                }
-            }
-
-
-            is MusicPlayerUiEvents.GetImageBitmap -> {
                 viewModelScope.launch {
                     _musicPlayerState.update { it.copy(isSongImageLoading = true) }
 
                     songImageRepository.getSongImage(event.url).onRight { bitmap ->
                         _musicPlayerState.update {
                             it.copy(
-                                songImagesBitmap = it.songImagesBitmap.toMutableList().apply {
-                                    bitmap?.let {
-                                        val colors: List<Color> = listOf(
-                                            Palette.from(bitmap)
-                                                .generate().darkVibrantSwatch?.let { Color(it.titleTextColor) }
-                                                ?: Color.Gray,
-                                            Palette.from(bitmap)
-                                                .generate().dominantSwatch?.let { Color(it.bodyTextColor) }
-                                                ?: Color.Gray,
-                                            Palette.from(bitmap)
-                                                .generate().lightMutedSwatch?.let { Color(it.titleTextColor) }
-                                                ?: Color.Gray,
-                                            Palette.from(bitmap)
-                                                .generate().darkMutedSwatch?.let { Color(it.titleTextColor) }
-                                                ?: Color.Gray
-                                        )
-                                        add(colors)
-                                    }
-
-                                    Log.d("check", "check 2")
-                                    Log.d("check", (bitmap == null).toString())
-
-//                                    add(image)
+                                getImageBitmap = it.getImageBitmap.toMutableList().apply {
+                                    add(bitmap!!)
                                 }, isSongImageLoading = false
                             )
 
                         }
-
+                        Log.d("check for colors", "${state.value.getImageBitmap.size}")
 
                     }.onLeft { error ->
                         _musicPlayerState.update {
