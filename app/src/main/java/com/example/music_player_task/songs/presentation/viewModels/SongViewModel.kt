@@ -103,6 +103,16 @@ class SongViewModel @Inject constructor(
                     )
                 }
 
+                mediaPlayer?.setOnSeekCompleteListener {
+                    _musicPlayerState.update { state ->
+                        state.copy(
+                            playingSongCurrentPosition = state.playingSongCurrentPosition.apply {
+                                this.value = it.currentPosition
+                            }
+                        )
+                    }
+                }
+
                 mediaPlayer?.setOnCompletionListener { mediaPlayer ->
                     mediaPlayer?.stop()
                     _musicPlayerState.update { state ->
@@ -209,7 +219,6 @@ class SongViewModel @Inject constructor(
                     )
                 }
             }
-
 
 
             is MusicPlayerUiEvents.GetColorsFromImage -> {
