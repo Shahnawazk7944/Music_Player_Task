@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -57,8 +58,8 @@ class SongViewModel @Inject constructor(
     }
 
     private var mediaPlayer: MediaPlayer? = null
-    private var scope = MainScope()
-//    private var scope = MainScope()
+    private var scope = viewModelScope
+    //private var scope = MainScope()
 
     fun onEvent(event: MusicPlayerUiEvents) {
         when (event) {
@@ -66,7 +67,7 @@ class SongViewModel @Inject constructor(
             is MusicPlayerUiEvents.PlaySong -> {
                 mediaPlayer?.let {
                     if (it.isPlaying) {
-                        scope.cancel()
+                        scope.coroutineContext.cancelChildren()
                         mediaPlayer?.stop()
                         mediaPlayer?.reset()
                         _musicPlayerState.update { state ->
@@ -123,7 +124,7 @@ class SongViewModel @Inject constructor(
                 }
 
                 mediaPlayer?.setOnCompletionListener { mediaPlayer ->
-                    scope.cancel()
+                    scope.coroutineContext.cancelChildren()
                     mediaPlayer?.stop()
                     _musicPlayerState.update { state ->
                         state.copy(
@@ -155,7 +156,7 @@ class SongViewModel @Inject constructor(
                     }
 
                     if (event.isPause) {
-                        scope.cancel()
+                        scope.coroutineContext.cancelChildren()
                         it.pause()
                     } else {
                         it.seekTo(state.value.playingSongCurrentPosition.value)
@@ -166,7 +167,7 @@ class SongViewModel @Inject constructor(
             }
 
             is MusicPlayerUiEvents.StopSong -> {
-                scope.cancel()
+                scope.coroutineContext.cancelChildren()
                 mediaPlayer?.stop()
                 mediaPlayer?.reset()
                 _musicPlayerState.update { state ->
@@ -182,7 +183,7 @@ class SongViewModel @Inject constructor(
             }
 
             is MusicPlayerUiEvents.ReleasePlayer -> {
-                scope.cancel()
+                scope.coroutineContext.cancelChildren()
                 mediaPlayer?.reset()
                 mediaPlayer?.release()
                 mediaPlayer = null
