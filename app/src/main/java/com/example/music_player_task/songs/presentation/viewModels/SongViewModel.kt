@@ -8,10 +8,15 @@ import com.example.music_player_task.songs.domain.repository.SongImageRepository
 import com.example.music_player_task.songs.domain.repository.SongRepository
 import com.example.music_player_task.songs.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -52,6 +57,8 @@ class SongViewModel @Inject constructor(
     }
 
     private var mediaPlayer: MediaPlayer? = null
+    private var scope = MainScope()
+//    private var scope = MainScope()
 
     fun onEvent(event: MusicPlayerUiEvents) {
         when (event) {
@@ -59,6 +66,7 @@ class SongViewModel @Inject constructor(
             is MusicPlayerUiEvents.PlaySong -> {
                 mediaPlayer?.let {
                     if (it.isPlaying) {
+                        scope.cancel()
                         mediaPlayer?.stop()
                         mediaPlayer?.reset()
                         _musicPlayerState.update { state ->
@@ -92,10 +100,11 @@ class SongViewModel @Inject constructor(
                     prepareAsync()
                 }
                 mediaPlayer?.setOnPreparedListener { mediaPlayer ->
-                    mediaPlayer.seekTo(state.value.playingSongCurrentPosition.value)
+                    mediaPlayer.seekTo(state.value.playingSongCurrentPosition.value.toInt())
                     mediaPlayer.start()
                     setSongDuration(mediaPlayer.duration)
-                    updatePlaybackState(mediaPlayer.currentPosition)
+                    scope.launch { seekbarUpdateObserver() }
+                   // updatePlaybackState(mediaPlayer.currentPosition.toFloat())
 
                     Log.d(
                         "check for currentD_VM",
@@ -114,6 +123,7 @@ class SongViewModel @Inject constructor(
                 }
 
                 mediaPlayer?.setOnCompletionListener { mediaPlayer ->
+                    scope.cancel()
                     mediaPlayer?.stop()
                     _musicPlayerState.update { state ->
                         state.copy(
@@ -145,15 +155,18 @@ class SongViewModel @Inject constructor(
                     }
 
                     if (event.isPause) {
+                        scope.cancel()
                         it.pause()
                     } else {
                         it.seekTo(state.value.playingSongCurrentPosition.value)
                         it.start()
+                        scope.launch { seekbarUpdateObserver() }
                     }
                 }
             }
 
             is MusicPlayerUiEvents.StopSong -> {
+                scope.cancel()
                 mediaPlayer?.stop()
                 mediaPlayer?.reset()
                 _musicPlayerState.update { state ->
@@ -169,6 +182,7 @@ class SongViewModel @Inject constructor(
             }
 
             is MusicPlayerUiEvents.ReleasePlayer -> {
+                scope.cancel()
                 mediaPlayer?.reset()
                 mediaPlayer?.release()
                 mediaPlayer = null
@@ -264,7 +278,21 @@ class SongViewModel @Inject constructor(
         }
 
     }
+    private suspend fun seekbarUpdateObserver() {
+        withContext(Dispatchers.IO) {
+            while (true) {
+                Log.d("check for dur", "${ state.value.playingSongCurrentPosition.value }")
+                if (mediaPlayer != null && mediaPlayer!!.isPlaying) {
+                    val pos = mediaPlayer!!.currentPosition
+                    //val progress = (pos.toFloat() / mediaPlayer!!.duration) * 100f
+                    updatePlaybackState(pos)
+                }
 
+                //delay(17L)
+                delay(1000)
+            }
+        }
+    }
     private fun updatePlaybackState(currentPosition: Int) {
         _musicPlayerState.update {
             it.copy(
