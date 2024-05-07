@@ -2,6 +2,7 @@ package com.example.music_player_task.songs.presentation.viewModels
 
 import android.graphics.Bitmap
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
